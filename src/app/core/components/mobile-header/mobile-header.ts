@@ -1,17 +1,15 @@
-import { ChangeDetectionStrategy, Component, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 import { Category, CATEGORY_LABELS } from '../../types';
 
 @Component({
   selector: 'app-mobile-header',
+  imports: [RouterLink, RouterLinkActive],
   templateUrl: './mobile-header.html',
   styleUrl: './mobile-header.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MobileHeaderComponent {
-  readonly currentCategory = input<Category>('people');
-  readonly onToggleMenu = output<void>();
-  readonly onSelectCategory = output<Category>();
-
   protected readonly isMenuOpen = signal(false);
   protected readonly categories: Category[] = ['people', 'planets', 'films', 'starships', 'vehicles', 'species'];
 
@@ -21,11 +19,9 @@ export class MobileHeaderComponent {
 
   toggleMenu(): void {
     this.isMenuOpen.update(v => !v);
-    this.onToggleMenu.emit();
   }
 
-  selectCategory(cat: Category): void {
-    this.onSelectCategory.emit(cat);
+  closeMenu(): void {
     this.isMenuOpen.set(false);
   }
 }

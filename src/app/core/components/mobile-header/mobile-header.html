@@ -4,11 +4,13 @@
   @if (isMenuOpen()) {
     <div class="hamburger-menu">
       @for (cat of categories; track cat) {
-        <button
-          [style.color]="currentCategory() === cat ? '#ED882D' : 'inherit'"
-          (click)="selectCategory(cat)">
+        <a
+          [routerLink]="'/' + cat"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          (click)="closeMenu()">
           {{ getCategoryLabel(cat) }}
-        </button>
+        </a>
       }
     </div>
   }

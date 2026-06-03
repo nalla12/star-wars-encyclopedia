@@ -1,10 +1,11 @@
 <nav class="category-tabs">
   @for (cat of categoryList; track cat) {
-    <button
-      [class.active]="currentCategory() === cat"
-      (click)="selectCategory(cat)"
-      class="cat-tab">
+    <a
+      class="cat-tab"
+      [routerLink]="'/' + cat"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }">
       {{ getCategoryLabel(cat) }}
-    </button>
+    </a>
   }
 </nav>

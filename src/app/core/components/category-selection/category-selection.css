@@ -27,6 +27,7 @@
   letter-spacing: 1px;
   color: var(--color-text);
   transition: color 0.2s, border-color 0.2s;
+  text-decoration: none;
 }
 
 .cat-tab:hover {

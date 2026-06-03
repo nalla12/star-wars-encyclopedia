@@ -76,7 +76,7 @@ export class DetailViewComponent {
 
     return Object.entries(item)
       .filter(([key, value]) => {
-        if (key.startsWith('_') || key === 'url' || key === 'uid' || key === 'description') return false;
+        if (key.startsWith('_') || key === 'url' || key === 'uid' || key === 'description' || key === 'created' || key === 'edited') return false;
         if (typeof value === 'string' && (value.startsWith('http://') || value.startsWith('https://'))) return false;
         return true;
       })
@@ -91,7 +91,8 @@ export class DetailViewComponent {
     this.route.paramMap.pipe(
       takeUntilDestroyed(this.destroyRef),
       switchMap(params => {
-        const category = params.get('category');
+        const parentParams = this.route.parent?.snapshot.paramMap;
+        const category = params.get('category') ?? parentParams?.get('category') ?? '';
         const id = params.get('id');
         if (!category || !id) {
           this.error.set('Invalid resource identifier.');
@@ -140,6 +141,8 @@ export class DetailViewComponent {
   }
 
   protected goBack(): void {
-    this.router.navigate(['/']);
+    const parentParams = this.route.parent?.snapshot.paramMap;
+    const category = this.route.snapshot.paramMap.get('category') ?? parentParams?.get('category');
+    this.router.navigate(['/', category]);
   }
 }

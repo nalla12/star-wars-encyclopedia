@@ -27,6 +27,8 @@
   min-height: 44px;
   transition: color 0.2s, border-color 0.2s;
   white-space: nowrap;
+  text-align: center;
+  text-decoration: none;
 }
 
 .nav-btn.active {

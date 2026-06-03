@@ -1,0 +1,21 @@
+<div class="list-area" [class.hidden-on-mobile]="isDetailView()">
+  <app-category-selection></app-category-selection>
+
+  <app-global-search
+    (onSearchChange)="onSearchChange($event)"
+  ></app-global-search>
+
+  @if (error(); as err) {
+    <div class="error-banner">{{ err }}</div>
+  }
+
+  <app-resource-list
+    [resources]="filteredResources()"
+    [isLoading]="isLoading()"
+    [title]="getCategoryLabel(currentCategory())"
+    [isEmpty]="isEmpty()"
+    (onItemSelect)="navigateToDetail($event)"
+  ></app-resource-list>
+</div>
+
+<router-outlet />
