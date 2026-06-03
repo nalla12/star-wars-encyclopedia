@@ -10,7 +10,7 @@
   } @else {
     <div class="resource-cards">
       @for (item of resources(); track item.id || item.name || item.url) {
-        <div class="resource-card" (click)="onItemSelect.emit(item)">
+        <div class="resource-card" (click)="onItemSelect.emit(item)" swipe (onSwipeLeft)="onItemSelect.emit(item)" (onSwipeRight)="onItemSelect.emit(item)">
           <h3>{{ item.name || item.model || item.title }}</h3>
           @if (item.subtitle || item.description) {
             <p>{{ item.subtitle || item.description }}</p>

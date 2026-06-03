@@ -134,6 +134,36 @@ The following deviations from the original plan were made to align with AGENTS.m
 - `src/app/app.css` — Hardcoded → CSS variables
 - `src/app/core/components/*/*.css` (6 component files) — Hardcoded → CSS variables
 
+## Implementation Notes (Phase 7 - applied deviations)
+
+### Deviations from original Phase 7 plan
+| PLAN.md (original) | What was done |
+|---|---|
+| "Bottom navigation bar (5-6 vertical pills)" | Horizontal sticky bottom nav with 6 horizontal pill buttons |
+| "Hamburger menu for categories" | Categories remain in hamburger (MobileHeader) + new BottomNav as primary mobile nav |
+| "Swipe gestures for cards" | Implemented via `SwipeDirective` — emits `onSwipeLeft`/`onSwipeRight` on 50px threshold with axis lock |
+| "Expanded modals for details" | Skipped — detail view is a separate route, not a modal (already done in Phase 5) |
+
+### Improvements
+- **BottomNav** (`app-bottom-nav`) — Fixed/sticky at viewport bottom, 6 category buttons with accent highlight on active, hidden on desktop via `@media (min-width: 768px)`
+- **CategorySelection** — Hidden on mobile (`display: none` below 768px), shown on tablet/desktop
+- **App root** — `padding-bottom: 56px` on mobile to prevent content overlap with fixed bottom nav, removed on desktop
+- **SwipeDirective** — Standalone directive using `host` object (per AGENTS.md), 50px minimum swipe distance with 2x axis lock ratio to prevent vertical scroll interference
+- **Resource cards** — Respond to both `click` and swipe gestures, triggering `onItemSelect`
+- **No new dependencies** — swipe gesture is pure `TouchEvent` detection
+
+### Files created
+- `src/app/core/components/bottom-nav/bottom-nav.ts` + `.html` + `.css`
+- `src/app/core/directives/swipe.directive.ts`
+
+### Files updated
+- `src/app/app.ts` — Imported `BottomNavComponent`
+- `src/app/app.html` — Added `<app-bottom-nav>` at bottom of template
+- `src/app/app.css` — Added responsive `padding-bottom` for bottom nav clearance
+- `src/app/core/components/category-selection/category-selection.css` — Hidden below 768px
+- `src/app/core/components/resource-list/resource-list.ts` — Imported `SwipeDirective`
+- `src/app/core/components/resource-list/resource-list.html` — Added swipe bindings to cards
+
 ## **Star Wars Encyclopedia - Angular App Plan**
 
 ### **Core Architecture**

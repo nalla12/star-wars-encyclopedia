@@ -25,3 +25,8 @@
 ></app-resource-list>
 
 <router-outlet />
+
+<app-bottom-nav
+  [currentCategory]="currentCategory()"
+  (onSelectCategory)="selectCategory($event)"
+></app-bottom-nav>

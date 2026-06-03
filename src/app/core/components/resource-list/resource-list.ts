@@ -1,8 +1,10 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { ResourceData } from '../../types';
+import { SwipeDirective } from '../../directives/swipe.directive';
 
 @Component({
   selector: 'app-resource-list',
+  imports: [SwipeDirective],
   templateUrl: './resource-list.html',
   styleUrl: './resource-list.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

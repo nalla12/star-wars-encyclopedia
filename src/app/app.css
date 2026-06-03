@@ -3,6 +3,13 @@
   min-height: 100vh;
   background: var(--color-bg);
   color: var(--color-text);
+  padding-bottom: 56px;
+}
+
+@media (min-width: 768px) {
+  :host {
+    padding-bottom: 0;
+  }
 }
 
 .error-banner {

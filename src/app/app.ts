@@ -7,6 +7,7 @@ import { MobileHeaderComponent } from './core/components/mobile-header/mobile-he
 import { CategorySelectionComponent } from './core/components/category-selection/category-selection';
 import { GlobalSearchComponent } from './core/components/global-search/global-search';
 import { ResourceListComponent } from './core/components/resource-list/resource-list';
+import { BottomNavComponent } from './core/components/bottom-nav/bottom-nav';
 import { SwapiService } from './core/services/swapi.service';
 import { ThemeService } from './core/services/theme.service';
 
@@ -18,6 +19,7 @@ import { ThemeService } from './core/services/theme.service';
     CategorySelectionComponent,
     GlobalSearchComponent,
     ResourceListComponent,
+    BottomNavComponent,
   ],
   templateUrl: './app.html',
   styleUrl: './app.css',
