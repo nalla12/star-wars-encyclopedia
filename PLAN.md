@@ -1,6 +1,20 @@
 ## Useful files
-1. **AGENTS.md**: Guidelines for using Angular v20+ with modern features (signals, standalone components, native control flow)
-2. **swapi_tech_README.md**: Complete API documentation for Star Wars API including rate limits (10,000 requests/day) and rate slowing (100ms delay after 5th request in 15 min window)
+1. **AGENTS.md**: Guidelines for using Angular v21+ with modern features (signals, standalone components, native control flow)
+2. **swapi_tech_documentation.md**: Complete API documentation for Star Wars API including rate limits (10,000 requests/day) and rate slowing (100ms delay after 5th request in 15 min window)
+
+## Implementation Notes (Phase 2 - applied deviations)
+
+The following deviations from the original plan were made to align with AGENTS.md best practices for Angular 21:
+
+| PLAN.md (original) | AGENTS.md → What was done |
+|---|---|
+| `fetch().then()` returning Promise mismatch with `Observable` return type | Wrapped `fetch()` in `from()` via RxJS `switchMap` pipeline to properly return `Observable` |
+| Constructor injection (`constructor(private cacheService: CacheService)`) | `inject()` function |
+| ThemeService defined as `@Component` | Implemented as proper `@Injectable({ providedIn: 'root' })` service |
+| `CacheService.clear()` uses glob `localStorage.removeItem(this.CACHE_PREFIX + '*')` | Proper iteration over localStorage keys with prefix matching |
+| Rate limiting `checkRateLimit()` sync method calling async `wait()` | Rewritten as proper async `applyRateLimit()` using RxJS pipeline |
+| Return types use concrete interfaces (`PeopleList`, etc.) | Using `Observable<unknown>` — types to be defined in later phases |
+| `CACHE_PREFIX = 'swari_cache_'` | Fixed to `'swapi_cache_'` |
 
 ## **Star Wars Encyclopedia - Angular App Plan**
 
@@ -401,15 +415,6 @@ Render with @for
 ├── package.json
 └── tsconfig.json
 ```
-
----
-
-## **Phase 1: Project Setup**
-
-### Initial Configuration
-- Update `angular.json` for mobile viewport
-- Remove default routing and app.module.ts (using standalone)
-- Setup mobile-first viewport meta tag
 
 ---
 
