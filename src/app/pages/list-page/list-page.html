@@ -30,7 +30,16 @@
     }
   </div>
 
-  <div class="detail-panel">
-    <router-outlet />
+  <div class="detail-panel" [class.open]="isDetailView()">
+    <div class="detail-backdrop" (click)="closeDetail()"></div>
+    <div class="detail-sheet">
+      <div class="sheet-handle" (click)="closeDetail()"></div>
+      <router-outlet />
+    </div>
+    <button class="close-button" (click)="closeDetail()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
   </div>
 </div>

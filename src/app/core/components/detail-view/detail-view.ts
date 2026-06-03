@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { map, switchMap } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { SwapiService } from '../../services/swapi.service';
@@ -58,7 +58,6 @@ const FIELD_LABELS: Record<string, string> = {
 export class DetailViewComponent {
   private readonly swapiService = inject(SwapiService);
   private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly resource = signal<Record<string, unknown> | null>(null);
@@ -140,9 +139,4 @@ export class DetailViewComponent {
     return String(value);
   }
 
-  protected goBack(): void {
-    const parentParams = this.route.parent?.snapshot.paramMap;
-    const category = this.route.snapshot.paramMap.get('category') ?? parentParams?.get('category');
-    this.router.navigate(['/', category]);
-  }
 }

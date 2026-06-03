@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, NavigationStart, Router, RouterOutlet } from '@angular/router';
 import { filter, map, switchMap } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { Category, CATEGORY_LABELS, ResourceData } from '../../core/types';
@@ -41,6 +41,8 @@ export class ListPageComponent {
 
   protected readonly hasMoreData = computed(() => this.currentPage() < this.totalPages());
 
+  private savedScrollPosition = 0;
+
   protected readonly filteredResources = computed(() => {
     const all = this.resources();
     const query = this.searchQuery().toLowerCase().trim();
@@ -62,10 +64,28 @@ export class ListPageComponent {
 
   constructor() {
     this.router.events.pipe(
-      filter(e => e instanceof NavigationEnd),
+      filter((e): e is NavigationStart => e instanceof NavigationStart),
       takeUntilDestroyed(this.destroyRef),
-    ).subscribe(() => {
-      this.isDetailView.set(this.router.url.split('/').filter(Boolean).length > 1);
+    ).subscribe(event => {
+      const wasDetail = this.router.url.split('/').filter(Boolean).length > 1;
+      const willBeDetail = event.url.split('/').filter(Boolean).length > 1;
+      if (!wasDetail && willBeDetail) {
+        this.savedScrollPosition = window.scrollY;
+      }
+    });
+
+    this.router.events.pipe(
+      filter((e): e is NavigationEnd => e instanceof NavigationEnd),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(event => {
+      const isNowDetail = event.url.split('/').filter(Boolean).length > 1;
+      this.isDetailView.set(isNowDetail);
+      if (!isNowDetail && this.savedScrollPosition > 0) {
+        requestAnimationFrame(() => {
+          window.scrollTo(0, this.savedScrollPosition);
+          this.savedScrollPosition = 0;
+        });
+      }
     });
 
     this.route.params.pipe(
@@ -157,5 +177,9 @@ export class ListPageComponent {
 
   protected navigateToDetail(item: ResourceData): void {
     this.router.navigate(['/', this.currentCategory(), item.uid]);
+  }
+
+  protected closeDetail(): void {
+    this.router.navigate(['/', this.currentCategory()]);
   }
 }
