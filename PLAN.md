@@ -50,6 +50,33 @@ The following deviations from the original plan were made to align with AGENTS.m
 - `src/app/core/components/global-search/global-search.ts` + `.html` + `.css`
 - `src/app/core/components/resource-list/resource-list.ts` + `.html` + `.css`
 
+## Implementation Notes (Phase 4 - applied deviations)
+
+### Deviations from original Phase 4 plan
+| PLAN.md (original) | What was done |
+|---|---|
+| `protected readonly Category = '...'` (invalid TS) | Imported `Category` type from `core/types.ts` |
+| Constructor injection (`constructor(private swapiService: SwapiService)`) | `inject()` function |
+| `getAllResources()` method on SwapiService (not implemented) | Category-based `getRequestForCategory()` dispatching to individual endpoint methods |
+| `subscribe()` without cleanup | Added proper `subscribe({ next, error })` with error handling |
+| `this.themeServiceImpl?.toggleTheme()` (typo + optional chaining) | Clean `this.themeService.toggleMode()` |
+| `isDarkMode` as component `input()` + mutated in `toggleTheme()` | Delegate to `ThemeService` exclusively |
+| `loadResources()` hard-coded to `getAllResources()` | Routes to correct endpoint per category via `switch` |
+| Missing API response → `ResourceData[]` mapping | Added `mapResponse()` to flatten SWAPI response properties |
+| No error state in template | Added `@if (error())` banner with error message |
+
+### Improvements
+- **`filteredResources`** computed handles search filtering across name/model/title
+- **`isEmpty`** computed distinguishes "no search results" from "no data loaded"
+- **Category label** passed as `title` input to ResourceList for contextual headings
+- **Responsive error banner** with destructive theming (#DA3633)
+- **Build is warning-free** — old unused RouterOutlet import is now properly consumed
+
+### Files updated
+- `src/app/app.ts` — Full integration with services and Phase 3 components
+- `src/app/app.html` — Template wiring all components with event bindings
+- `src/app/app.css` — Root layout and error banner styles
+
 ## **Star Wars Encyclopedia - Angular App Plan**
 
 ### **Core Architecture**
