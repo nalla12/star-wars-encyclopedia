@@ -11,7 +11,7 @@
 .detail-header h1 {
   margin: 0;
   color: var(--color-accent);
-  font-family: var(--font-heading);
+  font-family: var(--font-heading), sans-serif;
   text-transform: uppercase;
   letter-spacing: 2px;
   font-size: 24px;
@@ -52,7 +52,7 @@
   font-size: 13px;
   text-transform: uppercase;
   letter-spacing: 1px;
-  font-family: var(--font-heading);
+  font-family: var(--font-heading), sans-serif;
 }
 
 .detail-value {

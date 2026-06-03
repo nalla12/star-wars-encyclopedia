@@ -76,8 +76,7 @@ export class DetailViewComponent {
     return Object.entries(item)
       .filter(([key, value]) => {
         if (key.startsWith('_') || key === 'url' || key === 'uid' || key === 'description' || key === 'created' || key === 'edited') return false;
-        if (typeof value === 'string' && (value.startsWith('http://') || value.startsWith('https://'))) return false;
-        return true;
+        return !(typeof value === 'string' && (value.startsWith('http://') || value.startsWith('https://')));
       })
       .map(([key, value]) => ({
         key,
