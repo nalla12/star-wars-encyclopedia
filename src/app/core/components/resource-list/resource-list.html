@@ -1,0 +1,27 @@
+<section class="resource-list">
+  @if (isLoading()) {
+    <div class="loading-state">
+      <p>Loading {{ title() }}...</p>
+    </div>
+  } @else if (resources().length === 0) {
+    <p class="no-results">
+      {{ isEmpty() ? 'No results found' : 'No ' + title() + ' available yet' }}
+    </p>
+  } @else {
+    <div class="resource-cards">
+      @for (item of resources(); track item.id || item.name || item.url) {
+        <div class="resource-card" (click)="onItemSelect.emit(item)">
+          <h3>{{ item.name || item.model || item.title }}</h3>
+          @if (item.subtitle || item.description) {
+            <p>{{ item.subtitle || item.description }}</p>
+          }
+          @if (item.year || item.birthYear || item.releaseDate) {
+            <span class="meta">
+              {{ item.year || item.birthYear || item.releaseDate }}
+            </span>
+          }
+        </div>
+      }
+    </div>
+  }
+</section>

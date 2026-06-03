@@ -1,0 +1,18 @@
+<header class="mobile-header">
+  <button class="menu-toggle" (click)="toggleMenu()" aria-label="Toggle menu">☰</button>
+  <span class="app-title">Star Wars Encyclopedia</span>
+  <span class="category-indicator" [style.background-color]="getCategoryColor(currentCategory())">
+    {{ getCategoryLabel(currentCategory()) }}
+  </span>
+  @if (isMenuOpen()) {
+    <div class="hamburger-menu">
+      @for (cat of categories; track cat) {
+        <button
+          [style.color]="currentCategory() === cat ? '#ED882D' : 'inherit'"
+          (click)="selectCategory(cat)">
+          {{ getCategoryLabel(cat) }}
+        </button>
+      }
+    </div>
+  }
+</header>

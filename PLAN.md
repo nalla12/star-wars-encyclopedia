@@ -16,6 +16,40 @@ The following deviations from the original plan were made to align with AGENTS.m
 | Return types use concrete interfaces (`PeopleList`, etc.) | Using `Observable<unknown>` — types to be defined in later phases |
 | `CACHE_PREFIX = 'swari_cache_'` | Fixed to `'swapi_cache_'` |
 
+## Implementation Notes (Phase 3 - applied deviations)
+
+### General deviations
+| PLAN.md (original) | AGENTS.md → What was done |
+|---|---|
+| `@Input()` / `@Output()` decorators | `input()` / `output()` functions |
+| `[ngStyle]` bindings | `[style.*]` property bindings |
+| `standalone: true` in decorator | Omitted (default in Angular 19+) |
+| `styleUrls` (plural, deprecated) | `styleUrl` (singular) |
+| Missing `ChangeDetectionStrategy.OnPush` | Added to all components |
+| `@Input() resources = signal<T[]>([])` mixed decorator+signal | Clean `input<ResourceData[]>([])` |
+| Generic `<T>` on component class | Replaced with `ResourceData` interface |
+| `ngOnInit` lifecycle | Used `effect()` or constructor where needed |
+| `MobileHeader` duplicated `@Input` + `input()` | Clean `input()` only |
+| Missing shared types (`Category`, labels, colors) | Created `core/types.ts` |
+| `categoryList` as `signal<Category[]>` | Plain `readonly` array (no reactivity needed) |
+| Inline templates (`template:` inside `.ts`) | Always use separate `.html` file per component |
+| All component files flat in `components/` | Each component in its own folder (`components/<name>/`) |
+
+### Specific improvements
+- **MobileHeader**: `isMenuOpen` as proper signal instead of plain boolean
+- **CategorySelection**: Extracted inline template to separate `.html` file; removed `@empty` block (list is static, never async)
+- **GlobalSearch**: Extracted inline template to separate `.html` file; added `onSearchChange` output so parent can react to search
+- **ResourceList**: Restructured template with `@else if` / `@else` instead of multiple sibling `@if` blocks
+- **CSS**: Added responsive grid (`1fr` → `2fr` → `3fr`) for all viewports
+- **Touch targets**: All interactive elements have `min-height: 44px`
+
+### New files created
+- `src/app/core/types.ts` — `Category`, `ResourceData`, `CATEGORY_LABELS`, `CATEGORY_COLORS`
+- `src/app/core/components/mobile-header/mobile-header.ts` + `.html` + `.css`
+- `src/app/core/components/category-selection/category-selection.ts` + `.html` + `.css`
+- `src/app/core/components/global-search/global-search.ts` + `.html` + `.css`
+- `src/app/core/components/resource-list/resource-list.ts` + `.html` + `.css`
+
 ## **Star Wars Encyclopedia - Angular App Plan**
 
 ### **Core Architecture**

@@ -1,0 +1,12 @@
+<nav class="category-tabs">
+  @for (cat of categoryList; track cat) {
+    <button
+      [attr.aria-pressed]="currentCategory() === cat"
+      [style.color]="currentCategory() === cat ? catThemeColor() : 'inherit'"
+      [style.border-bottom-color]="currentCategory() === cat ? '#151B2E' : 'transparent'"
+      (click)="selectCategory(cat)"
+      class="cat-tab">
+      {{ getCategoryLabel(cat) }}
+    </button>
+  }
+</nav>

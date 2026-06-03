@@ -1,0 +1,14 @@
+<div class="search-container">
+  <input
+    type="text"
+    placeholder="Search characters, planets, films..."
+    [value]="searchQuery()"
+    (input)="onSearch($event)"
+    aria-label="Search resources"
+  />
+  @if (searchQuery(); as query) {
+    @if (query.length >= 3) {
+      <span class="search-icon">🔍</span>
+    }
+  }
+</div>
