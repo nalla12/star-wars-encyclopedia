@@ -1,0 +1,21 @@
+<div class="detail-page">
+  <header class="detail-header">
+    <button class="back-button" (click)="goBack()">← Back</button>
+    <h1>{{ resourceTitle() }}</h1>
+  </header>
+
+  @if (isLoading()) {
+    <div class="loading-state">Loading details...</div>
+  } @else if (error(); as err) {
+    <div class="error-state">{{ err }}</div>
+  } @else {
+    <div class="detail-grid">
+      @for (entry of detailEntries(); track entry.key) {
+        <div class="detail-row">
+          <span class="detail-label">{{ entry.label }}</span>
+          <span class="detail-value">{{ entry.value }}</span>
+        </div>
+      }
+    </div>
+  }
+</div>

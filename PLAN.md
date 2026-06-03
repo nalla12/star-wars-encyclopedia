@@ -77,6 +77,35 @@ The following deviations from the original plan were made to align with AGENTS.m
 - `src/app/app.html` — Template wiring all components with event bindings
 - `src/app/app.css` — Root layout and error banner styles
 
+## Implementation Notes (Phase 5 - applied deviations)
+
+### Deviations from original Phase 5 plan
+| PLAN.md (original) | What was done |
+|---|---|
+| `@Input() id = input<string>('')` (mixed decorator + function) | Clean `inject(ActivatedRoute)` to read route params |
+| `endpointMap` maps id→type (logically incorrect) | Route uses `detail/:category/:id` so both values come from URL |
+| `ngOnInit` lifecycle | Constructor with `route.snapshot.paramMap` |
+| `getResourceById` (not implemented) | Existing `getResource<T>(endpoint, id)` |
+| No route definition shown | Added `{ path: 'detail/:category/:id', component: DetailViewComponent }` to `app.routes.ts` |
+| `router.navigate(['/detail', item.uid])` (no category) | Updated to `['/detail', currentCategory(), item.uid]` |
+| Hard-coded property mapping | Generic `detailEntries()` computed — auto-labels any `snake_case` key and filters out URLs/internal fields |
+| `ResourceDetail` type (undefined) | Uses `Record<string, unknown>` with dynamic field rendering |
+
+### Improvements
+- **30+ human-readable field labels** mapped for all 6 resource types
+- **Generic renderer** — works for People, Planets, Films, Starships, Vehicles, Species without separate components
+- **URL filtering** — automatically hides URL-valued fields (homeworld, films, etc.) from the grid
+- **Array values** — joins arrays with commas, filters out URL entries
+- **Responsive grid** — label:value columns adapt from mobile 1:2 to desktop 1:3 ratio
+- **Error state** with back-navigation for invalid IDs or failed API calls
+
+### Files created
+- `src/app/core/components/detail-view/detail-view.ts` + `.html` + `.css`
+
+### Files updated
+- `src/app/app.routes.ts` — Added `/detail/:category/:id` route
+- `src/app/app.ts` — `navigateToDetail` now passes category to the route
+
 ## **Star Wars Encyclopedia - Angular App Plan**
 
 ### **Core Architecture**

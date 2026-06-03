@@ -116,7 +116,7 @@ export class App {
   }
 
   protected navigateToDetail(item: ResourceData): void {
-    this.router.navigate(['/detail', item.uid]);
+    this.router.navigate(['/detail', this.currentCategory(), item.uid]);
   }
 
   protected toggleTheme(): void {
