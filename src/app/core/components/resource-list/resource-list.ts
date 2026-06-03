@@ -14,5 +14,6 @@ export class ResourceListComponent {
   readonly title = input('Resources');
   readonly isLoading = input(false);
   readonly isEmpty = input(false);
+  readonly shrunk = input(false);
   readonly onItemSelect = output<ResourceData>();
 }

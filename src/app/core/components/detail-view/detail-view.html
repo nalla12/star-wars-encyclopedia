@@ -1,8 +1,10 @@
 <div class="detail-page">
-  <button class="back-button" (click)="goBack()">← Back</button>
-  <header class="detail-header">
-    <h1>{{ resourceTitle() }}</h1>
-  </header>
+  @if (!isLoading()) {
+    <button class="back-button" (click)="goBack()">← Back</button>
+    <header class="detail-header">
+      <h1>{{ resourceTitle() }}</h1>
+    </header>
+  }
 
   @if (isLoading()) {
     <div class="loading-state">Loading details...</div>

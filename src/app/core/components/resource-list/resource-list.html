@@ -1,4 +1,4 @@
-<section class="resource-list">
+<section class="resource-list" [class.shrunk]="shrunk()">
   @if (isLoading()) {
     <div class="loading-state">
       <p>Loading {{ title() }}...</p>

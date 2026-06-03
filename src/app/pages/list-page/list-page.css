@@ -12,3 +12,33 @@
     display: none;
   }
 }
+
+@media (min-width: 768px) {
+  .page-layout {
+    display: flex;
+    width: 100%;
+  }
+
+  .list-area {
+    flex: 1;
+    min-width: 0;
+    transition: flex 0.3s ease;
+  }
+
+  .detail-panel {
+    width: 0;
+    overflow: hidden;
+    transition: width 0.3s ease;
+  }
+
+  .has-detail .detail-panel {
+    width: 420px;
+    overflow: visible;
+  }
+}
+
+@media (min-width: 1024px) {
+  .has-detail .detail-panel {
+    width: 480px;
+  }
+}
