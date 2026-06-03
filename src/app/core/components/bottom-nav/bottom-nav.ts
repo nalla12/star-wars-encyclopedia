@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import { Category, CATEGORY_LABELS } from '../../types';
+import { Category, CATEGORY_LABELS, CATEGORY_ICONS } from '../../types';
 
 @Component({
   selector: 'app-bottom-nav',
@@ -14,5 +14,9 @@ export class BottomNavComponent {
 
   protected getCategoryLabel(cat: Category): string {
     return CATEGORY_LABELS[cat];
+  }
+
+  protected getCategoryIconPaths(cat: Category): string[] {
+    return CATEGORY_ICONS[cat];
   }
 }

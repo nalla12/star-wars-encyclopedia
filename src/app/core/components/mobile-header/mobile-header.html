@@ -1,17 +1,3 @@
 <header class="mobile-header">
-  <button class="menu-toggle" (click)="toggleMenu()" aria-label="Toggle menu">☰</button>
   <span class="app-title">Star Wars Encyclopedia</span>
-  @if (isMenuOpen()) {
-    <div class="hamburger-menu">
-      @for (cat of categories; track cat) {
-        <a
-          [routerLink]="'/' + cat"
-          routerLinkActive="active"
-          [routerLinkActiveOptions]="{ exact: true }"
-          (click)="closeMenu()">
-          {{ getCategoryLabel(cat) }}
-        </a>
-      }
-    </div>
-  }
 </header>
