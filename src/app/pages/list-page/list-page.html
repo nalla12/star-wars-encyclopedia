@@ -9,7 +9,7 @@
 }
 
 <div class="page-layout" [class.has-detail]="isDetailView()">
-  <div class="list-area" [class.hidden-on-mobile]="isDetailView()">
+  <div class="list-area">
     <app-resource-list
       [resources]="filteredResources()"
       [isLoading]="isLoading()"
