@@ -3,8 +3,8 @@
   gap: 4px;
   padding: 8px 16px;
   overflow-x: auto;
-  background: #161B22;
-  border-bottom: 1px solid #5D4037;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .cat-tab {
@@ -16,13 +16,13 @@
   cursor: pointer;
   white-space: nowrap;
   min-height: 44px;
-  font-family: 'Rajdhani', sans-serif;
+  font-family: var(--font-heading);
   text-transform: uppercase;
   letter-spacing: 1px;
-  color: #C9D1D9;
+  color: var(--color-text);
   transition: color 0.2s, border-color 0.2s;
 }
 
 .cat-tab:hover {
-  color: #F5DD5D;
+  color: var(--color-accent);
 }

@@ -5,13 +5,13 @@
 .loading-state {
   text-align: center;
   padding: 32px;
-  color: #6E7075;
+  color: var(--color-text-secondary);
 }
 
 .no-results {
   text-align: center;
   padding: 32px;
-  color: #6E7075;
+  color: var(--color-text-secondary);
   font-style: italic;
 }
 
@@ -22,8 +22,8 @@
 }
 
 .resource-card {
-  background: #161B22;
-  border: 1px solid #5D4037;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   padding: 16px;
   cursor: pointer;
@@ -38,21 +38,21 @@
 
 .resource-card h3 {
   margin: 0 0 8px;
-  color: #F5DD5D;
-  font-family: 'Rajdhani', sans-serif;
+  color: var(--color-accent);
+  font-family: var(--font-heading);
   text-transform: uppercase;
   letter-spacing: 1px;
 }
 
 .resource-card p {
   margin: 0 0 4px;
-  color: #C9D1D9;
+  color: var(--color-text);
   font-size: 14px;
 }
 
 .meta {
   font-size: 12px;
-  color: #6E7075;
+  color: var(--color-text-secondary);
 }
 
 @media (min-width: 768px) {

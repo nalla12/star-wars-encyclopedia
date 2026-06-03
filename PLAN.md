@@ -106,6 +106,34 @@ The following deviations from the original plan were made to align with AGENTS.m
 - `src/app/app.routes.ts` — Added `/detail/:category/:id` route
 - `src/app/app.ts` — `navigateToDetail` now passes category to the route
 
+## Implementation Notes (Phase 6 - applied deviations)
+
+### Deviations from original Phase 6 plan
+| PLAN.md (original) | What was done |
+|---|---|
+| `data-theme="dark"` block nested inside `:root` (invalid CSS) | Proper `:root` for defaults, `[data-theme="light"]` for overrides |
+| Only 8 CSS variables defined | 10 variables for full color system + 2 font families |
+| No `body` or `*` resets | Added `body` base styles, `* { box-sizing: border-box }`, `-webkit-font-smoothing` |
+| No font import mechanism shown | Added Google Fonts `<link>` in `index.html` (Rajdhani + Roboto) |
+| Hardcoded colors in all component CSS | All 6 component stylesheets refactored to use `var(--color-*)` |
+| `styleUrls` (deprecated plural) | `styleUrl` (modern singular) — already done in Phase 3 |
+| Title shown as `StarWarsEncyclopedia` | Updated to `Star Wars Encyclopedia` in `index.html` |
+| No viewport-fit=cover | Added for edge-to-edge mobile display |
+
+### Improvements
+- **Full design token system** with semantic variable names (`--color-bg`, `--color-surface`, `--color-accent`, etc.)
+- **Dark/light theme ready** — toggling `data-theme` on `<html>` instantly switches all component colors
+- **Rajdhani** (Google Font) imported for headings with weights 500/600/700
+- **Roboto** (Google Font) imported for body text with weights 400/500
+- **`@keyframes fadeIn`** animation available globally via `.fade-in` class
+- **Zero hardcoded colors** remain in component CSS — all reference CSS variables
+
+### Files updated
+- `src/styles/global.css` — Full theme system (was 1-line stub)
+- `src/index.html` — Google Fonts, updated title, `viewport-fit=cover`
+- `src/app/app.css` — Hardcoded → CSS variables
+- `src/app/core/components/*/*.css` (6 component files) — Hardcoded → CSS variables
+
 ## **Star Wars Encyclopedia - Angular App Plan**
 
 ### **Core Architecture**

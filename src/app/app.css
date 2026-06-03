@@ -1,13 +1,13 @@
 :host {
   display: block;
   min-height: 100vh;
-  background: #0D1117;
-  color: #C9D1D9;
+  background: var(--color-bg);
+  color: var(--color-text);
 }
 
 .error-banner {
-  background: #DA3633;
-  color: #F5F5F5;
+  background: var(--color-destructive);
+  color: var(--color-white);
   padding: 12px 16px;
   margin: 8px 16px;
   border-radius: 8px;
