@@ -18,6 +18,16 @@
       [shrunk]="isDetailView()"
       (onItemSelect)="navigateToDetail($event)"
     ></app-resource-list>
+
+    @if (!searchQuery().trim()) {
+      @if (isLoading() || loadingMore()) {
+        <div class="scroll-loading">Loading more...</div>
+      } @else if (hasMoreData()) {
+        <div class="scroll-sentinel" appInViewport (onIntersect)="loadMore()"></div>
+      } @else if (resources().length > 0) {
+        <div class="scroll-end">You've reached the bottom :)</div>
+      }
+    }
   </div>
 
   <div class="detail-panel">

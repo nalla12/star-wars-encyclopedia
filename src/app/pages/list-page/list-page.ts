@@ -7,6 +7,7 @@ import { Category, CATEGORY_LABELS, ResourceData } from '../../core/types';
 import { GlobalSearchComponent } from '../../core/components/global-search/global-search';
 import { ResourceListComponent } from '../../core/components/resource-list/resource-list';
 import { CategorySelectionComponent } from '../../core/components/category-selection/category-selection';
+import { InViewportDirective } from '../../core/directives/in-viewport.directive';
 import { SwapiService } from '../../core/services/swapi.service';
 
 @Component({
@@ -16,6 +17,7 @@ import { SwapiService } from '../../core/services/swapi.service';
     GlobalSearchComponent,
     ResourceListComponent,
     CategorySelectionComponent,
+    InViewportDirective,
   ],
   templateUrl: './list-page.html',
   styleUrl: './list-page.css',
@@ -33,6 +35,11 @@ export class ListPageComponent {
   protected readonly error = signal<string | null>(null);
   protected readonly resources = signal<ResourceData[]>([]);
   protected readonly isDetailView = signal(false);
+  protected readonly currentPage = signal(1);
+  protected readonly totalPages = signal(0);
+  protected readonly loadingMore = signal(false);
+
+  protected readonly hasMoreData = computed(() => this.currentPage() < this.totalPages());
 
   protected readonly filteredResources = computed(() => {
     const all = this.resources();
@@ -66,16 +73,19 @@ export class ListPageComponent {
       switchMap(params => {
         const cat = params['category'] as Category;
         this.currentCategory.set(cat);
+        this.currentPage.set(1);
+        this.totalPages.set(0);
+        this.resources.set([]);
         this.isLoading.set(true);
         this.error.set(null);
-        return this.getRequestForCategory(cat).pipe(
-          map(data => this.mapResponse(data)),
-        );
+        return this.loadPage(cat, 1);
       }),
     ).subscribe({
-      next: items => {
-        this.resources.set(items);
+      next: result => {
+        this.resources.set(result.items);
+        this.totalPages.set(result.totalPages);
         this.isLoading.set(false);
+        this.drainCache();
       },
       error: () => {
         this.error.set('Failed to load resources. Please try again.');
@@ -84,22 +94,54 @@ export class ListPageComponent {
     });
   }
 
-  private getRequestForCategory(cat: Category): Observable<unknown> {
-    switch (cat) {
-      case 'people': return this.swapiService.getPeople();
-      case 'planets': return this.swapiService.getPlanets();
-      case 'films': return this.swapiService.getFilms();
-      case 'starships': return this.swapiService.getStarships();
-      case 'vehicles': return this.swapiService.getVehicles();
-      case 'species': return this.swapiService.getSpecies();
+  private drainCache(): void {
+    if (this.hasMoreData() && !this.loadingMore()) {
+      this.loadMore();
     }
   }
 
-  private mapResponse(data: unknown): ResourceData[] {
-    type ResultItem = { properties: Record<string, unknown>; uid: string; description?: string };
-    const response = data as { result?: ResultItem[] | ResultItem; results?: ResultItem[] } | null;
-    const items = Array.isArray(response?.result) ? response!.result : response?.results;
-    if (!items) return [];
+  protected loadMore(): void {
+    if (this.loadingMore() || !this.hasMoreData() || this.searchQuery().trim()) return;
+    this.loadingMore.set(true);
+    const cat = this.currentCategory();
+    const nextPage = this.currentPage() + 1;
+    this.loadPage(cat, nextPage).subscribe({
+      next: result => {
+        this.resources.update(current => [...current, ...result.items]);
+        this.currentPage.set(nextPage);
+        this.totalPages.set(result.totalPages);
+        this.loadingMore.set(false);
+        this.drainCache();
+      },
+      error: () => {
+        this.loadingMore.set(false);
+      },
+    });
+  }
+
+  private loadPage(cat: Category, page: number): Observable<{ items: ResourceData[]; totalPages: number }> {
+    return this.getRequestForCategory(cat, page).pipe(
+      map((data: any) => ({
+        items: this.mapResponse(data),
+        totalPages: data.total_pages ?? 1,
+      })),
+    );
+  }
+
+  private getRequestForCategory(cat: Category, page: number): Observable<unknown> {
+    switch (cat) {
+      case 'people': return this.swapiService.getPeople(page);
+      case 'planets': return this.swapiService.getPlanets(page);
+      case 'films': return this.swapiService.getFilms(page);
+      case 'starships': return this.swapiService.getStarships(page);
+      case 'vehicles': return this.swapiService.getVehicles(page);
+      case 'species': return this.swapiService.getSpecies(page);
+    }
+  }
+
+  private mapResponse(data: any): ResourceData[] {
+    const items = Array.isArray(data?.result) ? data.result : data?.results;
+    if (!items || !Array.isArray(items)) return [];
 
     return items.map(r => ({
       uid: r.uid,

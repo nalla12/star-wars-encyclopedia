@@ -7,6 +7,19 @@
   font-size: 14px;
 }
 
+.scroll-loading,
+.scroll-end {
+  text-align: center;
+  padding: 24px 16px;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  font-style: italic;
+}
+
+.scroll-sentinel {
+  height: 1px;
+}
+
 @media (max-width: 767px) {
   .hidden-on-mobile {
     display: none;
@@ -29,6 +42,9 @@
     width: 0;
     overflow: hidden;
     transition: width 0.3s ease;
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
   }
 
   .has-detail .detail-panel {

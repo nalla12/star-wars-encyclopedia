@@ -19,28 +19,28 @@ export class SwapiService {
     this.requestTimestamps.push(now);
   }
 
-  getPeople(): Observable<unknown> {
-    return this.cacheableRequest('/people/?expanded=true');
+  getPeople(page = 1): Observable<unknown> {
+    return this.cacheableRequest(`/people/?page=${page}&limit=10&expanded=true`);
   }
 
-  getPlanets(): Observable<unknown> {
-    return this.cacheableRequest('/planets/?expanded=true');
+  getPlanets(page = 1): Observable<unknown> {
+    return this.cacheableRequest(`/planets/?page=${page}&limit=10&expanded=true`);
   }
 
-  getFilms(): Observable<unknown> {
-    return this.cacheableRequest('/films/?expanded=true');
+  getFilms(page = 1): Observable<unknown> {
+    return this.cacheableRequest(`/films/?page=${page}&limit=10&expanded=true`);
   }
 
-  getStarships(): Observable<unknown> {
-    return this.cacheableRequest('/starships/?expanded=true');
+  getStarships(page = 1): Observable<unknown> {
+    return this.cacheableRequest(`/starships/?page=${page}&limit=10&expanded=true`);
   }
 
-  getVehicles(): Observable<unknown> {
-    return this.cacheableRequest('/vehicles/?expanded=true');
+  getVehicles(page = 1): Observable<unknown> {
+    return this.cacheableRequest(`/vehicles/?page=${page}&limit=10&expanded=true`);
   }
 
-  getSpecies(): Observable<unknown> {
-    return this.cacheableRequest('/species/?expanded=true');
+  getSpecies(page = 1): Observable<unknown> {
+    return this.cacheableRequest(`/species/?page=${page}&limit=10&expanded=true`);
   }
 
   getResource<T>(endpoint: string, id: number): Observable<T> {
