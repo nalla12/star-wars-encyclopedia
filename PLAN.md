@@ -77,6 +77,13 @@ The following deviations from the original plan were made to align with AGENTS.m
 - `src/app/app.html` — Template wiring all components with event bindings
 - `src/app/app.css` — Root layout and error banner styles
 
+### Bug fix: SWAPI response key inconsistency
+The SWAPI API is inconsistent across resources:
+- **Films** returns list data under `result` (singular): `{ message: "ok", result: [...] }`
+- **People, Planets, Starships, Vehicles, Species** return list data under `results` (plural): `{ message: "ok", results: [...] }`
+
+The original `mapResponse` only checked `response?.result`, causing all non-Films categories to return empty arrays. Fix: check `Array.isArray(response?.result) ? response.result : response?.results`.
+
 ## Implementation Notes (Phase 5 - applied deviations)
 
 ### Deviations from original Phase 5 plan
@@ -105,6 +112,11 @@ The following deviations from the original plan were made to align with AGENTS.m
 ### Files updated
 - `src/app/app.routes.ts` — Added `/detail/:category/:id` route
 - `src/app/app.ts` — `navigateToDetail` now passes category to the route
+
+### Bug fix: Detail view stuck on first resource
+The `DetailViewComponent` read route params from `ActivatedRoute.snapshot.paramMap` in its constructor. When navigating between resources of the same category (e.g. `/detail/people/1` → `/detail/people/4`), Angular reuses the component instance — the constructor doesn't re-run and `snapshot` is stale.
+
+**Fix:** Subscribed to `route.paramMap` observable via `switchMap` with `takeUntilDestroyed()` cleanup. Each param change triggers a fresh API call, and `switchMap` cancels any in-flight request from the previous navigation.
 
 ## Implementation Notes (Phase 6 - applied deviations)
 
@@ -1274,18 +1286,3 @@ const SEARCH_PEOPLE = (term: string) => {
 - ✅ Dark/Light mode toggle
 - ✅ Touch gestures swipe-to-detail
 
----
-
-## **Next Steps**
-
-**Shall I proceed with implementation?** I will:
-
-1. Generate Angular app with `--standalone --style css`
-2. Create all services with proper type definitions
-3. Build components with signals and native control flow
-4. Implement Star Wars theme with responsive styles
-5. Integrate API with rate limiting and caching
-6. Configure mobile viewport and navigation
-7. Add error handling and loading states
-
-**Confirm to begin?** ✅

@@ -1,6 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
-import { map } from 'rxjs/operators';
+import { map, switchMap } from 'rxjs/operators';
+import { of } from 'rxjs';
 import { SwapiService } from '../../services/swapi.service';
 
 const FIELD_LABELS: Record<string, string> = {
@@ -57,6 +59,7 @@ export class DetailViewComponent {
   private readonly swapiService = inject(SwapiService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly resource = signal<Record<string, unknown> | null>(null);
   protected readonly isLoading = signal(true);
@@ -85,31 +88,27 @@ export class DetailViewComponent {
   });
 
   constructor() {
-    const category = this.route.snapshot.paramMap.get('category');
-    const id = this.route.snapshot.paramMap.get('id');
-    if (category && id) {
-      this.loadResource(category, id);
-    } else {
-      this.error.set('Invalid resource identifier.');
-      this.isLoading.set(false);
-    }
-  }
-
-  private loadResource(category: string, id: string): void {
-    this.isLoading.set(true);
-    this.error.set(null);
-
-    this.swapiService.getResource<unknown>(category, parseInt(id)).pipe(
-      map(data => this.mapDetail(data)),
-    ).subscribe({
-      next: item => {
+    this.route.paramMap.pipe(
+      takeUntilDestroyed(this.destroyRef),
+      switchMap(params => {
+        const category = params.get('category');
+        const id = params.get('id');
+        if (!category || !id) {
+          this.error.set('Invalid resource identifier.');
+          this.isLoading.set(false);
+          return of(null);
+        }
+        this.isLoading.set(true);
+        this.error.set(null);
+        return this.swapiService.getResource<unknown>(category, parseInt(id)).pipe(
+          map(data => this.mapDetail(data)),
+        );
+      }),
+    ).subscribe(item => {
+      if (item) {
         this.resource.set(item);
         this.isLoading.set(false);
-      },
-      error: () => {
-        this.error.set('Failed to load resource details.');
-        this.isLoading.set(false);
-      },
+      }
     });
   }
 

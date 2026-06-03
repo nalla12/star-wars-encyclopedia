@@ -61,12 +61,6 @@ export class App {
 
   private loadResources(): void {
     const cat = this.currentCategory();
-    if (cat === 'all') {
-      this.resources.set([]);
-      this.isLoading.set(false);
-      return;
-    }
-
     this.isLoading.set(true);
     this.error.set(null);
 
@@ -92,15 +86,16 @@ export class App {
       case 'starships': return this.swapiService.getStarships();
       case 'vehicles': return this.swapiService.getVehicles();
       case 'species': return this.swapiService.getSpecies();
-      default: return this.swapiService.getPeople();
     }
   }
 
   private mapResponse(data: unknown): ResourceData[] {
-    const response = data as { result: Array<{ properties: Record<string, unknown>; uid: string; description?: string }> } | null;
-    if (!response?.result) return [];
+    type ResultItem = { properties: Record<string, unknown>; uid: string; description?: string };
+    const response = data as { result?: ResultItem[] | ResultItem; results?: ResultItem[] } | null;
+    const items = Array.isArray(response?.result) ? response!.result : response?.results;
+    if (!items) return [];
 
-    return response.result.map(r => ({
+    return items.map(r => ({
       uid: r.uid,
       id: r.uid,
       name: String(r.properties?.['name'] ?? r.properties?.['title'] ?? r.properties?.['model'] ?? ''),

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, input, output, signal } from '@angular/core';
-import { Category, CATEGORY_LABELS, CATEGORY_COLORS } from '../../types';
+import { Category, CATEGORY_LABELS } from '../../types';
 
 @Component({
   selector: 'app-mobile-header',
@@ -8,7 +8,7 @@ import { Category, CATEGORY_LABELS, CATEGORY_COLORS } from '../../types';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MobileHeaderComponent {
-  readonly currentCategory = input<Category>('all');
+  readonly currentCategory = input<Category>('people');
   readonly onToggleMenu = output<void>();
   readonly onSelectCategory = output<Category>();
 
@@ -17,10 +17,6 @@ export class MobileHeaderComponent {
 
   protected getCategoryLabel(cat: Category): string {
     return CATEGORY_LABELS[cat];
-  }
-
-  protected getCategoryColor(cat: Category): string {
-    return CATEGORY_COLORS[cat];
   }
 
   toggleMenu(): void {

@@ -1,7 +1,6 @@
-export type Category = 'all' | 'people' | 'planets' | 'films' | 'starships' | 'vehicles' | 'species';
+export type Category = 'people' | 'planets' | 'films' | 'starships' | 'vehicles' | 'species';
 
 export const CATEGORY_LABELS: Record<Category, string> = {
-  all: 'All Resources',
   people: 'Characters',
   planets: 'Planets',
   films: 'Films',
@@ -11,7 +10,6 @@ export const CATEGORY_LABELS: Record<Category, string> = {
 };
 
 export const CATEGORY_COLORS: Record<Category, string> = {
-  all: '#0A4D91',
   people: '#ED882D',
   planets: '#151B2E',
   films: '#46D36E',

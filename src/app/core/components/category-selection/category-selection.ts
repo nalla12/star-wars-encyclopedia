@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
-import { Category, CATEGORY_LABELS, CATEGORY_COLORS } from '../../types';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { Category, CATEGORY_LABELS } from '../../types';
 
 @Component({
   selector: 'app-category-selection',
@@ -8,17 +8,12 @@ import { Category, CATEGORY_LABELS, CATEGORY_COLORS } from '../../types';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CategorySelectionComponent {
-  readonly currentCategory = input<Category>('all');
+  readonly currentCategory = input<Category>('people');
   readonly onSelectCategory = output<Category>();
 
   protected readonly categoryList: Category[] = [
-    'all', 'people', 'planets', 'films', 'starships', 'vehicles', 'species',
+    'people', 'planets', 'films', 'starships', 'vehicles', 'species',
   ];
-
-  protected readonly catThemeColor = computed(() => {
-    const cat = this.currentCategory();
-    return CATEGORY_COLORS[cat] ?? '#6E7075';
-  });
 
   protected getCategoryLabel(cat: Category): string {
     return CATEGORY_LABELS[cat];

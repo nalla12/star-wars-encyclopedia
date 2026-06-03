@@ -27,15 +27,6 @@
   flex: 1;
 }
 
-.category-indicator {
-  padding: 4px 12px;
-  border-radius: 4px;
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--color-white);
-}
-
 .hamburger-menu {
   position: absolute;
   top: 60px;
