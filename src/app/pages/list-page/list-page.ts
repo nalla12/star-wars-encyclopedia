@@ -123,12 +123,14 @@ export class ListPageComponent {
   private mapResponse(data: any): ResourceData[] {
     if (!Array.isArray(data)) return [];
 
-    return data.map(r => ({
-      id: String(r.id),
-      uid: String(r.id),
-      name: String(r.name ?? r.title ?? r.model ?? ''),
-      subtitle: '',
-    }));
+    return data
+      .filter((r: any) => r.name ?? r.title ?? r.model)
+      .map(r => ({
+        id: String(r.id),
+        uid: String(r.id),
+        name: String(r.name ?? r.title ?? r.model),
+        subtitle: '',
+      }));
   }
 
   protected onSearchChange(query: string): void {
