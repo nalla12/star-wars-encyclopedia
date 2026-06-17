@@ -176,6 +176,51 @@ The `DetailViewComponent` read route params from `ActivatedRoute.snapshot.paramM
 - `src/app/core/components/resource-list/resource-list.ts` — Imported `SwipeDirective`
 - `src/app/core/components/resource-list/resource-list.html` — Added swipe bindings to cards
 
+## Implementation Notes (Phase 8 — SVG Icons, Detail Sheet, API Migration)
+
+### SVG Heroicons
+- Created `CATEGORY_ICONS` in `core/types.ts` — each category gets an array of SVG path `d` strings from Heroicons
+- `bottom-nav`, `category-selection`, `mobile-header` render icons via `@for` over `CATEGORY_ICONS[cat]` — each path becomes an `<svg><path [attr.d]="path"/></svg>`
+- Desktop nav (category-selection) shows icon+text, mobile nav (bottom-nav) shows icon-only
+- Species icon changed from `sparkles` to `bug-ant` to avoid confusion with loading spinner
+
+### Mobile Detail Sheet (Bottom Pane)
+- Replaced `hidden-on-mobile` list-area hiding with a fixed-position bottom sheet that slides up from below
+- Backdrop (`detail-backdrop`) fades in behind the sheet at 50% black opacity
+- Sheet (`detail-sheet`) uses `transform: translateY(100%) → translateY(0)` for slide-up animation
+- Handle bar at top of sheet — tapping it closes the sheet (same as backdrop/close button)
+- Floating close button centered below the sheet — fades in when sheet is open
+- Sheet has `max-height: 85vh` with internal scroll, padded for bottom nav clearance
+- Desktop/tablet: detail panel slides in from right (420px/480px) with `position: sticky`
+
+### Signal-Driven Detail View (no router navigation)
+- `DetailViewComponent` no longer extends `ActivatedRoute` — uses `input.required<string>()` for `category` and `resourceId`
+- `ListPageComponent` uses `Location.go()` to update URL without full navigation, avoiding scroll jump
+- `PopStateEvent` listener handles browser back/forward — resets `selectedResourceId` on pop
+- `effect()` locks `document.body.style.overflow = 'hidden'` when detail sheet opens, restores on close/destroy
+- `isDetailView` changed from `signal` to `computed(() => this.selectedResourceId() !== null)`
+- App routes: removed child `:id` route (DetailViewComponent no longer route-driven)
+
+### Nav Tab Active State
+- `routerLinkActiveOptions` changed to `{ exact: false }` for both `bottom-nav` and `mobile-header` — keeps the active tab lit when browsing detail view at `/:category/:id`
+
+### API Migration: swapi.tech → swapi.online
+- New base URL: `https://swapi.online/api`
+- **No pagination** — API returns all resources in a single flat array
+- **No nesting** — responses are flat objects, not `{ result: { properties: { ... } } }`
+- **No rate limiting** — removed rate-limit tracking, delay logic, and page-based cache keys
+- `SwapiService.getResource()` now uses `/${endpoint}/${id}` directly (no `/characters` special-case for people)
+- `mapResponse()` in `ListPageComponent` reads `data[].id` and `data[].name`/`.title` from flat array
+- `mapDetail()` in `DetailViewComponent` reads flat properties — no `result.properties` indirection
+- Removed: `InViewportDirective` (no longer needed without pagination), `RouterOutlet` import, scroll-sentinel/lazy-load CSS, duplicate `toObservable` import
+- Removed unused CSS classes: `.scroll-loading`, `.scroll-end`, `.scroll-sentinel`
+
+### Cleanup
+- Removed hamburger menu (`.menu-toggle`, `.hamburger-menu`) from `mobile-header`
+- Removed back button from `detail-view` (sheet has handle + close button + backdrop)
+- Removed unused `InViewportDirective` file
+- Removed pagination state from `ListPageComponent` (`currentPage`, `totalPages`, `loadingMore`, `hasMoreData`, `drainCache`, `loadMore`)
+
 ## **Star Wars Encyclopedia - Angular App Plan**
 
 ### **Core Architecture**

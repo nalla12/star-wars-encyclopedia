@@ -1,23 +1,23 @@
-import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal } from '@angular/core';
+import { Location } from '@angular/common';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, effect, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, NavigationEnd, NavigationStart, Router, RouterOutlet } from '@angular/router';
-import { filter, map, switchMap } from 'rxjs/operators';
+import { ActivatedRoute } from '@angular/router';
+import { map, switchMap } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { Category, CATEGORY_LABELS, ResourceData } from '../../core/types';
 import { GlobalSearchComponent } from '../../core/components/global-search/global-search';
 import { ResourceListComponent } from '../../core/components/resource-list/resource-list';
 import { CategorySelectionComponent } from '../../core/components/category-selection/category-selection';
-import { InViewportDirective } from '../../core/directives/in-viewport.directive';
+import { DetailViewComponent } from '../../core/components/detail-view/detail-view';
 import { SwapiService } from '../../core/services/swapi.service';
 
 @Component({
   selector: 'app-list-page',
   imports: [
-    RouterOutlet,
     GlobalSearchComponent,
     ResourceListComponent,
     CategorySelectionComponent,
-    InViewportDirective,
+    DetailViewComponent,
   ],
   templateUrl: './list-page.html',
   styleUrl: './list-page.css',
@@ -25,24 +25,18 @@ import { SwapiService } from '../../core/services/swapi.service';
 })
 export class ListPageComponent {
   private readonly swapiService = inject(SwapiService);
-  private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly location = inject(Location);
   private readonly destroyRef = inject(DestroyRef);
 
-  protected readonly currentCategory = signal<Category>('people');
+  protected readonly currentCategory = signal<Category>('characters');
   protected readonly searchQuery = signal('');
   protected readonly isLoading = signal(false);
   protected readonly error = signal<string | null>(null);
   protected readonly resources = signal<ResourceData[]>([]);
-  protected readonly isDetailView = signal(false);
-  protected readonly currentPage = signal(1);
-  protected readonly totalPages = signal(0);
-  protected readonly loadingMore = signal(false);
+  protected readonly selectedResourceId = signal<string | null>(null);
 
-  protected readonly hasMoreData = computed(() => this.currentPage() < this.totalPages());
-
-  private savedScrollPosition = 0;
-
+  protected readonly isDetailView = computed(() => this.selectedResourceId() !== null);
   protected readonly filteredResources = computed(() => {
     const all = this.resources();
     const query = this.searchQuery().toLowerCase().trim();
@@ -63,28 +57,24 @@ export class ListPageComponent {
   }
 
   constructor() {
-    this.router.events.pipe(
-      filter((e): e is NavigationStart => e instanceof NavigationStart),
-      takeUntilDestroyed(this.destroyRef),
-    ).subscribe(event => {
-      const wasDetail = this.router.url.split('/').filter(Boolean).length > 1;
-      const willBeDetail = event.url.split('/').filter(Boolean).length > 1;
-      if (!wasDetail && willBeDetail) {
-        this.savedScrollPosition = window.scrollY;
+    effect(() => {
+      if (window.innerWidth < 768) {
+        document.body.style.overflow = this.isDetailView() ? 'hidden' : '';
       }
     });
 
-    this.router.events.pipe(
-      filter((e): e is NavigationEnd => e instanceof NavigationEnd),
-      takeUntilDestroyed(this.destroyRef),
-    ).subscribe(event => {
-      const isNowDetail = event.url.split('/').filter(Boolean).length > 1;
-      this.isDetailView.set(isNowDetail);
-      if (!isNowDetail && this.savedScrollPosition > 0) {
-        requestAnimationFrame(() => {
-          window.scrollTo(0, this.savedScrollPosition);
-          this.savedScrollPosition = 0;
-        });
+    this.destroyRef.onDestroy(() => {
+      document.body.style.overflow = '';
+    });
+
+    this.location.subscribe(() => {
+      const segments = this.location.path().split('/').filter(Boolean);
+      if (segments.length <= 1) {
+        this.selectedResourceId.set(null);
+      } else if (segments[0] === this.currentCategory()) {
+        this.selectedResourceId.set(segments[1]);
+      } else {
+        this.selectedResourceId.set(null);
       }
     });
 
@@ -93,19 +83,25 @@ export class ListPageComponent {
       switchMap(params => {
         const cat = params['category'] as Category;
         this.currentCategory.set(cat);
-        this.currentPage.set(1);
-        this.totalPages.set(0);
         this.resources.set([]);
         this.isLoading.set(true);
         this.error.set(null);
-        return this.loadPage(cat, 1);
+
+        const segments = this.location.path().split('/').filter(Boolean);
+        if (segments[0] === cat && segments.length > 1) {
+          this.selectedResourceId.set(segments[1]);
+        } else {
+          this.selectedResourceId.set(null);
+        }
+
+        return this.getRequestForCategory(cat).pipe(
+          map(data => this.mapResponse(data)),
+        );
       }),
     ).subscribe({
-      next: result => {
-        this.resources.set(result.items);
-        this.totalPages.set(result.totalPages);
+      next: items => {
+        this.resources.set(items);
         this.isLoading.set(false);
-        this.drainCache();
       },
       error: () => {
         this.error.set('Failed to load resources. Please try again.');
@@ -114,61 +110,27 @@ export class ListPageComponent {
     });
   }
 
-  private drainCache(): void {
-    if (this.hasMoreData() && !this.loadingMore()) {
-      this.loadMore();
-    }
-  }
-
-  protected loadMore(): void {
-    if (this.loadingMore() || !this.hasMoreData() || this.searchQuery().trim()) return;
-    this.loadingMore.set(true);
-    const cat = this.currentCategory();
-    const nextPage = this.currentPage() + 1;
-    this.loadPage(cat, nextPage).subscribe({
-      next: result => {
-        this.resources.update(current => [...current, ...result.items]);
-        this.currentPage.set(nextPage);
-        this.totalPages.set(result.totalPages);
-        this.loadingMore.set(false);
-        this.drainCache();
-      },
-      error: () => {
-        this.loadingMore.set(false);
-      },
-    });
-  }
-
-  private loadPage(cat: Category, page: number): Observable<{ items: ResourceData[]; totalPages: number }> {
-    return this.getRequestForCategory(cat, page).pipe(
-      map((data: any) => ({
-        items: this.mapResponse(data),
-        totalPages: data.total_pages ?? 1,
-      })),
-    );
-  }
-
-  private getRequestForCategory(cat: Category, page: number): Observable<unknown> {
+  private getRequestForCategory(cat: Category): Observable<unknown> {
     switch (cat) {
-      case 'people': return this.swapiService.getPeople(page);
-      case 'planets': return this.swapiService.getPlanets(page);
-      case 'films': return this.swapiService.getFilms(page);
-      case 'starships': return this.swapiService.getStarships(page);
-      case 'vehicles': return this.swapiService.getVehicles(page);
-      case 'species': return this.swapiService.getSpecies(page);
+      case 'characters': return this.swapiService.getCharacters();
+      case 'planets': return this.swapiService.getPlanets();
+      case 'films': return this.swapiService.getFilms();
+      case 'transports': return this.swapiService.getTransports();
+      case 'species': return this.swapiService.getSpecies();
     }
   }
 
   private mapResponse(data: any): ResourceData[] {
-    const items = Array.isArray(data?.result) ? data.result : data?.results;
-    if (!items || !Array.isArray(items)) return [];
+    if (!Array.isArray(data)) return [];
 
-    return items.map(r => ({
-      uid: r.uid,
-      id: r.uid,
-      name: String(r.properties?.['name'] ?? r.properties?.['title'] ?? r.properties?.['model'] ?? ''),
-      subtitle: r.description,
-    }));
+    return data
+      .filter((r: any) => r.name ?? r.title ?? r.model)
+      .map(r => ({
+        id: String(r.id),
+        uid: String(r.id),
+        name: String(r.name ?? r.title ?? r.model),
+        subtitle: '',
+      }));
   }
 
   protected onSearchChange(query: string): void {
@@ -176,10 +138,14 @@ export class ListPageComponent {
   }
 
   protected navigateToDetail(item: ResourceData): void {
-    this.router.navigate(['/', this.currentCategory(), item.uid]);
+    const url = `/${this.currentCategory()}/${item.uid}`;
+    this.location.go(url);
+    this.selectedResourceId.set(item.uid ?? null);
   }
 
   protected closeDetail(): void {
-    this.router.navigate(['/', this.currentCategory()]);
+    const url = `/${this.currentCategory()}`;
+    this.location.go(url);
+    this.selectedResourceId.set(null);
   }
 }

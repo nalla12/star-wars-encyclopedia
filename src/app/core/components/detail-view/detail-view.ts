@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ActivatedRoute } from '@angular/router';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { map, switchMap } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { of, combineLatest } from 'rxjs';
 import { SwapiService } from '../../services/swapi.service';
 
 const FIELD_LABELS: Record<string, string> = {
@@ -20,7 +20,7 @@ const FIELD_LABELS: Record<string, string> = {
   terrain: 'Terrain',
   diameter: 'Diameter (km)',
   population: 'Population',
-  rotation_period: 'Rotation Period (days)',
+  rotation_period: 'Rotation Period (hours)',
   orbital_period: 'Orbital Period (days)',
   gravity: 'Gravity',
   episode_id: 'Episode',
@@ -57,8 +57,10 @@ const FIELD_LABELS: Record<string, string> = {
 })
 export class DetailViewComponent {
   private readonly swapiService = inject(SwapiService);
-  private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
+
+  readonly category = input.required<string>();
+  readonly resourceId = input.required<string>();
 
   protected readonly resource = signal<Record<string, unknown> | null>(null);
   protected readonly isLoading = signal(true);
@@ -86,20 +88,13 @@ export class DetailViewComponent {
   });
 
   constructor() {
-    this.route.paramMap.pipe(
+    combineLatest([toObservable(this.category), toObservable(this.resourceId)]).pipe(
       takeUntilDestroyed(this.destroyRef),
-      switchMap(params => {
-        const parentParams = this.route.parent?.snapshot.paramMap;
-        const category = params.get('category') ?? parentParams?.get('category') ?? '';
-        const id = params.get('id');
-        if (!category || !id) {
-          this.error.set('Invalid resource identifier.');
-          this.isLoading.set(false);
-          return of(null);
-        }
+      switchMap(([cat, id]) => {
+        if (!cat || !id) return of(null);
         this.isLoading.set(true);
         this.error.set(null);
-        return this.swapiService.getResource<unknown>(category, parseInt(id)).pipe(
+        return this.swapiService.getResource<Record<string, unknown>>(cat, parseInt(id, 10)).pipe(
           map(data => this.mapDetail(data)),
         );
       }),
@@ -111,15 +106,10 @@ export class DetailViewComponent {
     });
   }
 
-  private mapDetail(data: unknown): Record<string, unknown> {
-    const response = data as { result: { properties: Record<string, unknown>; description?: string; uid: string } } | null;
-    const result = response?.result;
-    if (!result?.properties) return {};
-
+  private mapDetail(data: Record<string, unknown>): Record<string, unknown> {
     return {
-      ...result.properties,
-      uid: result.uid,
-      description: result.description,
+      ...data,
+      uid: String(data['id'] ?? ''),
     };
   }
 
@@ -137,5 +127,4 @@ export class DetailViewComponent {
     }
     return String(value);
   }
-
 }
