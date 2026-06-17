@@ -58,7 +58,9 @@ export class ListPageComponent {
 
   constructor() {
     effect(() => {
-      document.body.style.overflow = this.isDetailView() ? 'hidden' : '';
+      if (window.innerWidth < 768) {
+        document.body.style.overflow = this.isDetailView() ? 'hidden' : '';
+      }
     });
 
     this.destroyRef.onDestroy(() => {
