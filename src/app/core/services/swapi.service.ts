@@ -24,10 +24,6 @@ export class SwapiService {
     return this.cacheableRequest('/starships');
   }
 
-  getVehicles(page?: number): Observable<unknown> {
-    return this.cacheableRequest('/vehicles');
-  }
-
   getSpecies(page?: number): Observable<unknown> {
     return this.cacheableRequest('/species');
   }
