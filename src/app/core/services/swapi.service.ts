@@ -8,8 +8,8 @@ export class SwapiService {
   private readonly BASE_URL = 'https://swapi.online/api';
   private readonly cacheService = inject(CacheService);
 
-  getPeople(page?: number): Observable<unknown> {
-    return this.cacheableRequest('/people');
+  getCharacters(page?: number): Observable<unknown> {
+    return this.cacheableRequest('/characters');
   }
 
   getPlanets(page?: number): Observable<unknown> {
@@ -36,8 +36,8 @@ export class SwapiService {
     return this.cacheableRequest(`/${endpoint}/${id}`) as Observable<T>;
   }
 
-  searchPeople(term: string): Observable<unknown> {
-    return this.cacheableRequest(`/people?search=${encodeURIComponent(term)}`);
+  searchCharacters(term: string): Observable<unknown> {
+    return this.cacheableRequest(`/characters?search=${encodeURIComponent(term)}`);
   }
 
   private cacheableRequest(endpoint: string): Observable<unknown> {

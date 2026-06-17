@@ -10,7 +10,7 @@ import { Category, CATEGORY_LABELS, CATEGORY_ICONS } from '../../types';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BottomNavComponent {
-  protected readonly categories: Category[] = ['people', 'planets', 'films', 'starships', 'vehicles', 'species'];
+  protected readonly categories: Category[] = ['characters', 'planets', 'films', 'starships', 'vehicles', 'species'];
 
   protected getCategoryLabel(cat: Category): string {
     return CATEGORY_LABELS[cat];

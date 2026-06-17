@@ -13,7 +13,7 @@ src/
 └── app/
     ├── app.ts / .html / .css        # Root shell: mobile-header + router-outlet + bottom-nav
     ├── app.config.ts                # provideRouter
-    ├── app.routes.ts                # Routes: '' → /people, /:category → ListPageComponent
+    ├── app.routes.ts                # Routes: '' → /characters, /:category → ListPageComponent
     ├── core/
     │   ├── types.ts                 # Category, CATEGORY_LABELS, CATEGORY_COLORS, CATEGORY_ICONS, ResourceData
     │   ├── services/
@@ -39,8 +39,8 @@ Only 2 routes defined — detail views are NOT separate routes:
 
 | Path | Component | Behavior |
 |------|-----------|----------|
-| `/` | — | Redirects to `/people` |
-| `/:category` | `ListPageComponent` | Matches `people`/`planets`/`films`/`starships`/`vehicles`/`species` |
+| `/` | — | Redirects to `/characters` |
+| `/:category` | `ListPageComponent` | Matches `characters`/`planets`/`films`/`starships`/`vehicles`/`species` |
 
 When a user taps a resource card, `ListPageComponent` calls `Location.go('/:category/:id')` to update the URL bar, then sets `selectedResourceId` signal to show the detail sheet. No Angular router navigation occurs — this avoids re-rendering the entire page. `Location.subscribe()` listens for browser back/forward (popstate) events to close the sheet.
 

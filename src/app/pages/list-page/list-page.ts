@@ -29,7 +29,7 @@ export class ListPageComponent {
   private readonly location = inject(Location);
   private readonly destroyRef = inject(DestroyRef);
 
-  protected readonly currentCategory = signal<Category>('people');
+  protected readonly currentCategory = signal<Category>('characters');
   protected readonly searchQuery = signal('');
   protected readonly isLoading = signal(false);
   protected readonly error = signal<string | null>(null);
@@ -110,7 +110,7 @@ export class ListPageComponent {
 
   private getRequestForCategory(cat: Category): Observable<unknown> {
     switch (cat) {
-      case 'people': return this.swapiService.getPeople();
+      case 'characters': return this.swapiService.getCharacters();
       case 'planets': return this.swapiService.getPlanets();
       case 'films': return this.swapiService.getFilms();
       case 'starships': return this.swapiService.getStarships();
