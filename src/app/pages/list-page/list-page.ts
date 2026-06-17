@@ -115,7 +115,7 @@ export class ListPageComponent {
       case 'characters': return this.swapiService.getCharacters();
       case 'planets': return this.swapiService.getPlanets();
       case 'films': return this.swapiService.getFilms();
-      case 'starships': return this.swapiService.getStarships();
+      case 'transports': return this.swapiService.getTransports();
       case 'species': return this.swapiService.getSpecies();
     }
   }

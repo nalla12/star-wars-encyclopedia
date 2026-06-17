@@ -11,7 +11,7 @@ import { Category, CATEGORY_LABELS, CATEGORY_ICONS } from '../../types';
 })
 export class CategorySelectionComponent {
   protected readonly categoryList: Category[] = [
-    'characters', 'planets', 'films', 'starships', 'species',
+    'characters', 'planets', 'films', 'transports', 'species',
   ];
 
   protected getCategoryLabel(cat: Category): string {

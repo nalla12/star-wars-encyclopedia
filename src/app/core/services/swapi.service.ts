@@ -20,7 +20,7 @@ export class SwapiService {
     return this.cacheableRequest('/films');
   }
 
-  getStarships(page?: number): Observable<unknown> {
+  getTransports(page?: number): Observable<unknown> {
     return this.cacheableRequest('/transports');
   }
 
@@ -28,13 +28,8 @@ export class SwapiService {
     return this.cacheableRequest('/species');
   }
 
-  private readonly endpointMap: Record<string, string> = {
-    starships: 'transports',
-  };
-
   getResource<T>(endpoint: string, id: number): Observable<T> {
-    const mapped = this.endpointMap[endpoint] ?? endpoint;
-    return this.cacheableRequest(`/${mapped}/${id}`) as Observable<T>;
+    return this.cacheableRequest(`/${endpoint}/${id}`) as Observable<T>;
   }
 
   searchCharacters(term: string): Observable<unknown> {

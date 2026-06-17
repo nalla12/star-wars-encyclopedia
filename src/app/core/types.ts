@@ -1,11 +1,10 @@
-export type Category = 'characters' | 'planets' | 'films' | 'starships' | 'species';
+export type Category = 'characters' | 'planets' | 'films' | 'transports' | 'species';
 
 export const CATEGORY_LABELS: Record<Category, string> = {
   characters: 'Characters',
   planets: 'Planets',
   films: 'Films',
-  starships: 'Starships',
-
+  transports: 'Transports',
   species: 'Species',
 };
 
@@ -13,8 +12,7 @@ export const CATEGORY_COLORS: Record<Category, string> = {
   characters: '#ED882D',
   planets: '#151B2E',
   films: '#46D36E',
-  starships: '#DA3633',
-
+  transports: '#DA3633',
   species: '#F5F5F5',
 };
 
@@ -79,7 +77,7 @@ export const CATEGORY_ICONS: Record<Category, string[]> = {
     'M3.375 15.75H4.875',
     'M19.125 15.75H20.625',
   ],
-  starships: [
+  transports: [
     'M15.5904 14.3696C15.6948 14.8128 15.75 15.275 15.75 15.75C15.75 19.0637 13.0637 21.75 9.75 21.75V16.9503',
     'M15.5904 14.3696C19.3244 11.6411 21.75 7.22874 21.75 2.25C16.7715 2.25021 12.3595 4.67586 9.63122 8.40975',
     'M15.5904 14.3696C13.8819 15.6181 11.8994 16.514 9.75 16.9503',
