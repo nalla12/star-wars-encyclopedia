@@ -2,6 +2,7 @@
   <app-category-selection></app-category-selection>
 
   <app-global-search
+    [resetKey]="searchResetKey()"
     (onSearchChange)="onSearchChange($event)"
   ></app-global-search>
 

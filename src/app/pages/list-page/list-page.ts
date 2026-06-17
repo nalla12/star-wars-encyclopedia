@@ -30,6 +30,7 @@ export class ListPageComponent {
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly currentCategory = signal<Category>('characters');
+  protected readonly searchResetKey = signal(0);
   protected readonly searchQuery = signal('');
   protected readonly isLoading = signal(false);
   protected readonly error = signal<string | null>(null);
@@ -83,6 +84,8 @@ export class ListPageComponent {
       switchMap(params => {
         const cat = params['category'] as Category;
         this.currentCategory.set(cat);
+        this.searchResetKey.update(k => k + 1);
+        this.searchQuery.set('');
         this.resources.set([]);
         this.isLoading.set(true);
         this.error.set(null);

@@ -21,7 +21,21 @@
   color: var(--color-text-secondary);
 }
 
-.search-icon {
-  font-size: 20px;
-  padding: 8px;
+.clear-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color 0.2s;
+}
+
+.clear-btn:hover {
+  color: var(--color-text);
 }
