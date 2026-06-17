@@ -1,12 +1,14 @@
-<app-category-selection></app-category-selection>
+<div class="sticky-header">
+  <app-category-selection></app-category-selection>
 
-<app-global-search
-  (onSearchChange)="onSearchChange($event)"
-></app-global-search>
+  <app-global-search
+    (onSearchChange)="onSearchChange($event)"
+  ></app-global-search>
 
-@if (error(); as err) {
-  <div class="error-banner">{{ err }}</div>
-}
+  @if (error(); as err) {
+    <div class="error-banner">{{ err }}</div>
+  }
+</div>
 
 <div class="page-layout" [class.has-detail]="isDetailView()">
   <div class="list-area">
