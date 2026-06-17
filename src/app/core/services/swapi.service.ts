@@ -5,42 +5,31 @@ import { CacheService } from './cache.service';
 
 @Injectable({ providedIn: 'root' })
 export class SwapiService {
-  private readonly BASE_URL = 'https://www.swapi.tech/api';
+  private readonly BASE_URL = 'https://swapi.online/api';
   private readonly cacheService = inject(CacheService);
-  private requestTimestamps: number[] = [];
 
-  private async applyRateLimit(): Promise<void> {
-    const now = Date.now();
-    const windowMs = 15 * 60 * 1000;
-    this.requestTimestamps = this.requestTimestamps.filter(t => now - t < windowMs);
-    if (this.requestTimestamps.length >= 5) {
-      await this.cacheService.wait(100);
-    }
-    this.requestTimestamps.push(now);
+  getPeople(page?: number): Observable<unknown> {
+    return this.cacheableRequest('/people');
   }
 
-  getPeople(page = 1): Observable<unknown> {
-    return this.cacheableRequest(`/people/?page=${page}&limit=10&expanded=true`);
+  getPlanets(page?: number): Observable<unknown> {
+    return this.cacheableRequest('/planets');
   }
 
-  getPlanets(page = 1): Observable<unknown> {
-    return this.cacheableRequest(`/planets/?page=${page}&limit=10&expanded=true`);
+  getFilms(page?: number): Observable<unknown> {
+    return this.cacheableRequest('/films');
   }
 
-  getFilms(page = 1): Observable<unknown> {
-    return this.cacheableRequest(`/films/?page=${page}&limit=10&expanded=true`);
+  getStarships(page?: number): Observable<unknown> {
+    return this.cacheableRequest('/starships');
   }
 
-  getStarships(page = 1): Observable<unknown> {
-    return this.cacheableRequest(`/starships/?page=${page}&limit=10&expanded=true`);
+  getVehicles(page?: number): Observable<unknown> {
+    return this.cacheableRequest('/vehicles');
   }
 
-  getVehicles(page = 1): Observable<unknown> {
-    return this.cacheableRequest(`/vehicles/?page=${page}&limit=10&expanded=true`);
-  }
-
-  getSpecies(page = 1): Observable<unknown> {
-    return this.cacheableRequest(`/species/?page=${page}&limit=10&expanded=true`);
+  getSpecies(page?: number): Observable<unknown> {
+    return this.cacheableRequest('/species');
   }
 
   getResource<T>(endpoint: string, id: number): Observable<T> {
@@ -48,7 +37,7 @@ export class SwapiService {
   }
 
   searchPeople(term: string): Observable<unknown> {
-    return this.cacheableRequest(`/people/?search=${encodeURIComponent(term)}`);
+    return this.cacheableRequest(`/people?search=${encodeURIComponent(term)}`);
   }
 
   private cacheableRequest(endpoint: string): Observable<unknown> {
@@ -57,8 +46,7 @@ export class SwapiService {
       return of(cached);
     }
 
-    return from(this.applyRateLimit()).pipe(
-      switchMap(() => from(fetch(`${this.BASE_URL}${endpoint}`))),
+    return from(fetch(`${this.BASE_URL}${endpoint}`)).pipe(
       switchMap(response => {
         if (!response.ok) {
           throw new Error(`API error: ${response.status} ${response.statusText}`);

@@ -6,20 +6,6 @@
   border-radius: 8px;
   font-size: 14px;
 }
-
-.scroll-loading,
-.scroll-end {
-  text-align: center;
-  padding: 24px 16px;
-  color: var(--color-text-secondary);
-  font-size: 14px;
-  font-style: italic;
-}
-
-.scroll-sentinel {
-  height: 1px;
-}
-
 @media (max-width: 767px) {
   .hidden-on-mobile {
     display: none;
