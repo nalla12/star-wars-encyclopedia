@@ -5,7 +5,6 @@ import { map, switchMap } from 'rxjs/operators';
 import { of, combineLatest } from 'rxjs';
 import { SwapiService } from '../../services/swapi.service';
 import { WookieepediaService } from '../../services/wookieepedia.service';
-import { CATEGORY_COLORS } from '../../types';
 
 const FIELD_LABELS: Record<string, string> = {
   name: 'Name',
@@ -69,16 +68,10 @@ export class DetailViewComponent {
   protected readonly isLoading = signal(true);
   protected readonly error = signal<string | null>(null);
   protected readonly imageUrl = signal<string | null>(null);
-  protected readonly imageLoading = signal(true);
 
   protected readonly resourceTitle = computed(() => {
     const item = this.resource();
     return String(item?.['name'] ?? item?.['title'] ?? item?.['model'] ?? 'Unknown');
-  });
-
-  protected readonly categoryColor = computed(() => {
-    const cat = this.category();
-    return CATEGORY_COLORS[cat as keyof typeof CATEGORY_COLORS] ?? '#333';
   });
 
   protected readonly detailEntries = computed(() => {
@@ -105,7 +98,6 @@ export class DetailViewComponent {
         this.isLoading.set(true);
         this.error.set(null);
         this.imageUrl.set(null);
-        this.imageLoading.set(true);
         return this.swapiService.getResource<Record<string, unknown>>(cat, parseInt(id, 10)).pipe(
           map(data => this.mapDetail(data)),
         );
@@ -116,17 +108,11 @@ export class DetailViewComponent {
         this.isLoading.set(false);
 
         const title = String(item?.['name'] ?? item?.['title'] ?? item?.['model'] ?? '');
-        if (!title || title === 'Unknown') {
-          this.imageLoading.set(false);
-          return of(null);
-        }
+        if (!title || title === 'Unknown') return of(null);
 
         return this.wookieepediaService.getImageURL(title);
       }),
-    ).subscribe(url => {
-      this.imageUrl.set(url);
-      this.imageLoading.set(false);
-    });
+    ).subscribe(url => this.imageUrl.set(url));
   }
 
   private mapDetail(data: Record<string, unknown>): Record<string, unknown> {
