@@ -10,6 +10,17 @@
   } @else if (error(); as err) {
     <div class="error-state">{{ err }}</div>
   } @else {
+    <div class="detail-image-wrapper">
+      @if (imageLoading()) {
+        <div class="image-loading"></div>
+      } @else if (imageUrl(); as url) {
+        <img [src]="url" [alt]="resourceTitle()" />
+      } @else {
+        <div class="image-placeholder" [style.background-color]="categoryColor()">
+          <span class="placeholder-letter">{{ resourceTitle()[0] }}</span>
+        </div>
+      }
+    </div>
     <div class="detail-grid">
       @for (entry of detailEntries(); track entry.key) {
         <div class="detail-row">
