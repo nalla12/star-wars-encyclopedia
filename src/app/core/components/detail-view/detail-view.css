@@ -33,10 +33,11 @@
   border-radius: 12px;
   overflow: hidden;
   margin-bottom: 24px;
-  max-height: 300px;
+  height: 300px;
   display: flex;
   justify-content: center;
-  background: var(--color-surface);
+  align-items: center;
+  background: var(--color-bg);
 }
 
 .detail-image-wrapper img {
@@ -49,14 +50,14 @@
 
 .image-loading {
   width: 100%;
-  height: 200px;
+  height: 300px;
   background: var(--color-surface);
   animation: pulse 1.5s ease-in-out infinite;
 }
 
 .image-placeholder {
   width: 100%;
-  height: 200px;
+  height: 300px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -118,12 +119,9 @@
     font-size: 28px;
   }
 
-  .detail-image-wrapper {
-    max-height: 360px;
-  }
-
+  .detail-image-wrapper,
   .image-loading,
   .image-placeholder {
-    height: 260px;
+    height: 300px;
   }
 }
