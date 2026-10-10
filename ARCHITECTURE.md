@@ -2,7 +2,7 @@
 
 ## Stack
 
-Angular 21 standalone components, Signals (`resource` / `rxResource` / `linkedSignal`), native control flow (`@if`/`@for`/`@switch`), zoneless change detection, CSS custom properties, `fetch()` (no `HttpClient`).
+Angular 22 standalone components, Signals (`resource` / `rxResource` / `linkedSignal`), native control flow (`@if`/`@for`/`@switch`), zoneless change detection, CSS custom properties, `fetch()` (no `HttpClient`).
 
 ## Project Structure
 

@@ -2,7 +2,7 @@
 
 URL: <https://star-wars-encyclopedia.web.app/>
 
-An Angular v21 mobile-optimized webapp for quick lookup of characters, planets, films, transports and species from the Star Wars universe.
+An Angular v22 mobile-optimized webapp for quick lookup of characters, planets, films, transports and species from the Star Wars universe.
 
 Data is fetched from <https://swapi.online/>
 
