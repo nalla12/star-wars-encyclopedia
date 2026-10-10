@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, effect, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, model } from '@angular/core';
 
 @Component({
   selector: 'app-global-search',
@@ -7,26 +7,14 @@ import { ChangeDetectionStrategy, Component, effect, input, output, signal } fro
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GlobalSearchComponent {
-  readonly resetKey = input(0);
-  readonly searchQuery = signal('');
-  readonly onSearchChange = output<string>();
+  readonly query = model('');
 
-  constructor() {
-    effect(() => {
-      this.resetKey();
-      this.searchQuery.set('');
-    });
+  protected onSearch(event: Event): void {
+    this.query.set((event.target as HTMLInputElement).value);
   }
 
-  onSearch(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    this.searchQuery.set(input.value);
-    this.onSearchChange.emit(input.value);
-  }
-
-  clearSearch(input: HTMLInputElement): void {
-    this.searchQuery.set('');
-    this.onSearchChange.emit('');
+  protected clearSearch(input: HTMLInputElement): void {
+    this.query.set('');
     input.focus();
   }
 }

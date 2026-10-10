@@ -1,16 +1,14 @@
-<nav class="category-tabs">
-  @for (cat of categoryList; track cat) {
+<nav class="category-tabs" aria-label="Categories">
+  @for (cat of categories; track cat) {
     <a
       class="cat-tab"
-      [routerLink]="'/' + cat"
+      [routerLink]="['/', cat]"
       routerLinkActive="active"
-      [routerLinkActiveOptions]="{ exact: false }">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        @for (d of getCategoryIconPaths(cat); track $index) {
-          <path [attr.d]="d" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        }
-      </svg>
-      {{ getCategoryLabel(cat) }}
+      [routerLinkActiveOptions]="{ exact: false }"
+      ariaCurrentWhenActive="page"
+    >
+      <app-category-icon [category]="cat" [size]="20" />
+      {{ CATEGORY_LABELS[cat] }}
     </a>
   }
 </nav>

@@ -1,14 +1,24 @@
-import { Location } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, DestroyRef, effect, inject, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ActivatedRoute } from '@angular/router';
-import { map, switchMap } from 'rxjs/operators';
-import { Observable } from 'rxjs';
-import { Category, CATEGORY_LABELS, ResourceData } from '../../core/types';
+import type { ElementRef } from '@angular/core';
+import {
+  afterRenderEffect,
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  input,
+  linkedSignal,
+  viewChild,
+} from '@angular/core';
+import { Router } from '@angular/router';
+import { rxResource } from '@angular/core/rxjs-interop';
+import { map } from 'rxjs/operators';
+import type { Category, ResourceData } from '../../core/types';
+import { CATEGORY_LABELS } from '../../core/types';
 import { GlobalSearchComponent } from '../../core/components/global-search/global-search';
 import { ResourceListComponent } from '../../core/components/resource-list/resource-list';
 import { CategorySelectionComponent } from '../../core/components/category-selection/category-selection';
 import { DetailViewComponent } from '../../core/components/detail-view/detail-view';
+import { ScrollLockDirective } from '../../core/directives/scroll-lock.directive';
 import { SwapiService } from '../../core/services/swapi.service';
 
 @Component({
@@ -18,6 +28,7 @@ import { SwapiService } from '../../core/services/swapi.service';
     ResourceListComponent,
     CategorySelectionComponent,
     DetailViewComponent,
+    ScrollLockDirective,
   ],
   templateUrl: './list-page.html',
   styleUrl: './list-page.css',
@@ -25,130 +36,89 @@ import { SwapiService } from '../../core/services/swapi.service';
 })
 export class ListPageComponent {
   private readonly swapiService = inject(SwapiService);
-  private readonly route = inject(ActivatedRoute);
-  private readonly location = inject(Location);
-  private readonly destroyRef = inject(DestroyRef);
+  private readonly router = inject(Router);
 
-  protected readonly currentCategory = signal<Category>('characters');
-  protected readonly searchResetKey = signal(0);
-  protected readonly searchQuery = signal('');
-  protected readonly isLoading = signal(false);
-  protected readonly error = signal<string | null>(null);
-  protected readonly resources = signal<ResourceData[]>([]);
-  protected readonly selectedResourceId = signal<string | null>(null);
+  readonly category = input.required<Category>();
+  readonly id = input<string>();
 
-  protected readonly isDetailView = computed(() => this.selectedResourceId() !== null);
+  protected readonly resourcesRef = rxResource<ResourceData[], Category>({
+    params: () => this.category(),
+    stream: ({ params, abortSignal }) =>
+      this.swapiService
+        .getCollection(params, abortSignal)
+        .pipe(map((data) => this.mapCollection(data))),
+  });
+
+  protected readonly resources = computed<ResourceData[]>(() =>
+    this.resourcesRef.hasValue() ? this.resourcesRef.value() : [],
+  );
+
+  protected readonly isLoading = computed(() => this.resourcesRef.isLoading());
+  protected readonly error = computed(() => this.resourcesRef.error());
+
+  protected readonly searchQuery = linkedSignal<Category, string>({
+    source: () => this.category(),
+    computation: () => '',
+  });
+
+  protected readonly isDetailView = computed(() => this.id() !== undefined);
+  protected readonly selectedResourceId = computed(() => this.id() ?? null);
+
   protected readonly filteredResources = computed(() => {
-    const all = this.resources();
     const query = this.searchQuery().toLowerCase().trim();
-    if (!query) return all;
-    return all.filter(r =>
-      (r.name?.toLowerCase().includes(query)) ||
-      (r.model?.toLowerCase().includes(query)) ||
-      (r.title?.toLowerCase().includes(query))
-    );
+    if (!query) return this.resources();
+
+    return this.resources().filter((item) => item.name?.toLowerCase().includes(query));
   });
 
   protected readonly isEmpty = computed(() => {
     return this.resources().length > 0 && this.filteredResources().length === 0;
   });
 
-  protected getCategoryLabel(cat: Category): string {
-    return CATEGORY_LABELS[cat];
-  }
+  protected readonly categoryLabel = computed(() => CATEGORY_LABELS[this.category()]);
+
+  private readonly sheetRef = viewChild<ElementRef<HTMLElement>>('sheet');
+  private lastFocused: HTMLElement | null = null;
 
   constructor() {
-    effect(() => {
-      if (window.innerWidth < 768) {
-        document.body.style.overflow = this.isDetailView() ? 'hidden' : '';
-      }
-    });
+    afterRenderEffect(() => {
+      const open = this.isDetailView();
+      const sheet = this.sheetRef()?.nativeElement;
 
-    this.destroyRef.onDestroy(() => {
-      document.body.style.overflow = '';
-    });
+      if (!open || !sheet || sheet.matches(':focus-within')) return;
 
-    this.location.subscribe(() => {
-      const segments = this.location.path().split('/').filter(Boolean);
-      if (segments.length <= 1) {
-        this.selectedResourceId.set(null);
-      } else if (segments[0] === this.currentCategory()) {
-        this.selectedResourceId.set(segments[1]);
-      } else {
-        this.selectedResourceId.set(null);
-      }
-    });
-
-    this.route.params.pipe(
-      takeUntilDestroyed(this.destroyRef),
-      switchMap(params => {
-        const cat = params['category'] as Category;
-        this.currentCategory.set(cat);
-        this.searchResetKey.update(k => k + 1);
-        this.searchQuery.set('');
-        this.resources.set([]);
-        this.isLoading.set(true);
-        this.error.set(null);
-
-        const segments = this.location.path().split('/').filter(Boolean);
-        if (segments[0] === cat && segments.length > 1) {
-          this.selectedResourceId.set(segments[1]);
-        } else {
-          this.selectedResourceId.set(null);
-        }
-
-        return this.getRequestForCategory(cat).pipe(
-          map(data => this.mapResponse(data)),
-        );
-      }),
-    ).subscribe({
-      next: items => {
-        this.resources.set(items);
-        this.isLoading.set(false);
-      },
-      error: () => {
-        this.error.set('Failed to load resources. Please try again.');
-        this.isLoading.set(false);
-      },
+      this.lastFocused = document.activeElement as HTMLElement | null;
+      sheet.focus();
     });
   }
 
-  private getRequestForCategory(cat: Category): Observable<unknown> {
-    switch (cat) {
-      case 'characters': return this.swapiService.getCharacters();
-      case 'planets': return this.swapiService.getPlanets();
-      case 'films': return this.swapiService.getFilms();
-      case 'transports': return this.swapiService.getTransports();
-      case 'species': return this.swapiService.getSpecies();
-    }
+  protected restoreFocus(): void {
+    this.lastFocused?.focus();
+    this.lastFocused = null;
   }
 
-  private mapResponse(data: any): ResourceData[] {
-    if (!Array.isArray(data)) return [];
-
-    return data
-      .filter((r: any) => r.name ?? r.title ?? r.model)
-      .map(r => ({
-        id: String(r.id),
-        uid: String(r.id),
-        name: String(r.name ?? r.title ?? r.model),
-        subtitle: '',
-      }));
-  }
-
-  protected onSearchChange(query: string): void {
-    this.searchQuery.set(query);
+  protected retry(): void {
+    this.resourcesRef.reload();
   }
 
   protected navigateToDetail(item: ResourceData): void {
-    const url = `/${this.currentCategory()}/${item.uid}`;
-    this.location.go(url);
-    this.selectedResourceId.set(item.uid ?? null);
+    this.router.navigate(['/', this.category(), item.uid]);
   }
 
   protected closeDetail(): void {
-    const url = `/${this.currentCategory()}`;
-    this.location.go(url);
-    this.selectedResourceId.set(null);
+    this.restoreFocus();
+    this.router.navigate(['/', this.category()]);
+  }
+
+  private mapCollection(data: Record<string, unknown>[]): ResourceData[] {
+    if (!Array.isArray(data)) return [];
+
+    return data
+      .filter((item) => item['name'] ?? item['title'] ?? item['model'])
+      .map((item) => ({
+        id: String(item['id']),
+        uid: String(item['id']),
+        name: String(item['name'] ?? item['title'] ?? item['model']),
+      }));
   }
 }

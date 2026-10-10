@@ -29,7 +29,9 @@
   color: var(--color-text-secondary);
   cursor: pointer;
   min-height: 56px;
-  transition: color 0.2s, border-color 0.2s;
+  transition:
+    color 0.2s,
+    border-color 0.2s;
   white-space: nowrap;
   text-align: center;
   text-decoration: none;

@@ -1,10 +1,17 @@
-import { Routes } from '@angular/router';
-import { ListPageComponent } from './pages/list-page/list-page';
+import type { Routes } from '@angular/router';
+import { categoryGuard } from './core/guards/category.guard';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'characters', pathMatch: 'full' },
+  { path: '', pathMatch: 'full', redirectTo: 'characters' },
   {
     path: ':category',
-    component: ListPageComponent,
+    canActivate: [categoryGuard],
+    loadComponent: () => import('./pages/list-page/list-page').then((m) => m.ListPageComponent),
   },
+  {
+    path: ':category/:id',
+    canActivate: [categoryGuard],
+    loadComponent: () => import('./pages/list-page/list-page').then((m) => m.ListPageComponent),
+  },
+  { path: '**', redirectTo: 'characters' },
 ];

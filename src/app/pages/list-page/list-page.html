@@ -2,41 +2,70 @@
   <app-category-selection></app-category-selection>
 
   <app-global-search
-    [resetKey]="searchResetKey()"
-    (onSearchChange)="onSearchChange($event)"
+    [query]="searchQuery()"
+    (queryChange)="searchQuery.set($event)"
   ></app-global-search>
 
   @if (error(); as err) {
-    <div class="error-banner">{{ err }}</div>
+    <div class="error-banner" role="alert">
+      <span>{{ err.message }}</span>
+      <button type="button" class="retry-button" (click)="retry()">Retry</button>
+    </div>
   }
 </div>
 
-<div class="page-layout" [class.has-detail]="isDetailView()">
+<div class="page-layout" [class.has-detail]="isDetailView()" [appScrollLock]="isDetailView()">
   <div class="list-area">
     <app-resource-list
       [resources]="filteredResources()"
       [isLoading]="isLoading()"
-      [title]="getCategoryLabel(currentCategory())"
+      [title]="categoryLabel()"
       [isEmpty]="isEmpty()"
       [shrunk]="isDetailView()"
-      (onItemSelect)="navigateToDetail($event)"
+      (itemSelect)="navigateToDetail($event)"
     ></app-resource-list>
   </div>
 
-  <div class="detail-panel" [class.open]="isDetailView()">
-    <div class="detail-backdrop" (click)="closeDetail()"></div>
-    <div class="detail-sheet">
-      <div class="sheet-handle" (click)="closeDetail()"></div>
+  <div
+    class="detail-panel"
+    [class.open]="isDetailView()"
+    role="dialog"
+    aria-labelledby="detail-title"
+    [attr.inert]="isDetailView() ? null : ''"
+    (keydown.escape)="closeDetail()"
+  >
+    <button
+      type="button"
+      class="detail-backdrop"
+      aria-label="Close details"
+      (click)="closeDetail()"
+    ></button>
+    <div class="detail-sheet" #sheet tabindex="-1">
+      <button
+        type="button"
+        class="sheet-handle"
+        aria-label="Close details"
+        (click)="closeDetail()"
+      ></button>
       @if (selectedResourceId(); as id) {
-        <app-detail-view
-          [category]="currentCategory()"
-          [resourceId]="id"
-        />
+        <app-detail-view [category]="category()" [resourceId]="id" />
       }
     </div>
-    <button class="close-button" (click)="closeDetail()">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <button type="button" class="close-button" (click)="closeDetail()" aria-label="Close details">
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M6 18L18 6M6 6l12 12"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
       </svg>
     </button>
   </div>

@@ -1,58 +1,104 @@
 import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
-import { map } from 'rxjs/operators';
+import type { Observable } from 'rxjs';
+import { from, of } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 import { CacheService } from './cache.service';
 
+const BASE_URL = 'https://starwars.fandom.com/api.php';
+const THUMB_SIZE = 500;
+const SEARCH_LIMIT = 10;
+const IMAGE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const MISS_TTL_MS = 6 * 60 * 60 * 1000;
+const REQUEST_TIMEOUT_MS = 15_000;
+
 interface FandomPage {
+  index?: number;
   title?: string;
   thumbnail?: { source?: string };
 }
 
+interface CachedImage {
+  source: string | null;
+}
+
+interface FandomResponse {
+  query?: { pages?: Record<string, FandomPage> };
+}
+
 @Injectable({ providedIn: 'root' })
 export class WookieepediaService {
-  private readonly BASE_URL = 'https://starwars.fandom.com/api.php';
-  private readonly http = inject(HttpClient);
   private readonly cacheService = inject(CacheService);
 
-  getImageURL(name: string): Observable<string | null> {
-    const cacheKey = `fandom_${name.replace(/\s+/g, '_')}`;
+  getImageURL(name: string, abortSignal?: AbortSignal): Observable<string | null> {
+    const key = this.cacheKey(name);
+    const cached = this.cacheService.get<CachedImage>(key);
 
-    const cached = this.cacheService.get<{ source: string | null }>(cacheKey);
     if (cached !== null) {
-      return of(cached.source);
+      return of(cached.source ?? null);
     }
 
-    const url = `${this.BASE_URL}?action=query&generator=search&gsrsearch=${encodeURIComponent(name)}&prop=pageimages&format=json&pithumbsize=500&gsrlimit=10`;
+    const url =
+      `${BASE_URL}?action=query&generator=search&gsrsearch=${encodeURIComponent(name)}` +
+      `&gsrnamespace=0&gsrlimit=${SEARCH_LIMIT}&prop=pageimages&pithumbsize=${THUMB_SIZE}` +
+      `&format=json&origin=*`;
 
-    return this.http.jsonp<Record<string, unknown>>(url, 'callback').pipe(
-      map(data => {
-        const pages = (data['query'] as Record<string, unknown>)?.['pages'] as Record<string, unknown> | undefined;
-        if (!pages) return null;
+    const signal = abortSignal
+      ? AbortSignal.any([abortSignal, AbortSignal.timeout(REQUEST_TIMEOUT_MS)])
+      : AbortSignal.timeout(REQUEST_TIMEOUT_MS);
 
-        const entries = Object.values(pages) as FandomPage[];
-
-        const pick = this.pickBest(entries, name);
-        const source = pick?.thumbnail?.source ?? null;
-        this.cacheService.set(cacheKey, { source });
+    return from(fetch(url, { signal })).pipe(
+      switchMap((response) => {
+        if (!response.ok) {
+          throw new Error(`Fandom API error: ${response.status} ${response.statusText}`);
+        }
+        return from(response.json() as Promise<FandomResponse>);
+      }),
+      map((data) => {
+        const source = this.pickImage(data, name);
+        this.cacheService.set<CachedImage>(key, { source }, source ? IMAGE_TTL_MS : MISS_TTL_MS);
         return source;
       }),
     );
   }
 
-  private pickBest(pages: FandomPage[], searchName: string): FandomPage | null {
-    const exact = pages.find(p => p.title === searchName && !!p.thumbnail);
-    if (exact) return exact;
+  private cacheKey(name: string): string {
+    return `fandom_${name.trim().toLowerCase().replace(/\s+/g, '_')}`;
+  }
 
-    const good = pages.find(p => {
-      if (!p.thumbnail) return false;
-      const title = p.title ?? '';
-      if (title.endsWith('/Legends')) return false;
-      if (title.includes('(disambiguation)')) return false;
-      return true;
-    });
-    if (good) return good;
+  private pickImage(data: FandomResponse, searchName: string): string | null {
+    const pages = Object.values(data.query?.pages ?? {});
+    const ranked = pages
+      .filter((page) => !!page.thumbnail?.source)
+      .sort((a, b) => (a.index ?? Number.MAX_SAFE_INTEGER) - (b.index ?? Number.MAX_SAFE_INTEGER));
 
-    return pages.find(p => !!p.thumbnail) ?? null;
+    const target = searchName.trim().toLowerCase();
+    const source = (page: FandomPage | undefined) => page?.thumbnail?.source ?? null;
+
+    return (
+      source(ranked.find((page) => page.title?.toLowerCase() === target)) ??
+      source(
+        ranked.find((page) => this.stripSuffixes(page.title ?? '').toLowerCase() === target),
+      ) ??
+      source(
+        ranked.find((page) =>
+          this.stripSuffixes(page.title ?? '')
+            .toLowerCase()
+            .startsWith(target),
+        ),
+      ) ??
+      source(ranked.find((page) => this.isUsableTitle(page.title ?? ''))) ??
+      source(ranked[0])
+    );
+  }
+
+  private isUsableTitle(title: string): boolean {
+    return !title.includes('(disambiguation)') && !title.endsWith('/Legends');
+  }
+
+  private stripSuffixes(title: string): string {
+    return title
+      .replace(/\s*\([^)]*\)\s*$/, '')
+      .replace(/\/Legends$/, '')
+      .trim();
   }
 }

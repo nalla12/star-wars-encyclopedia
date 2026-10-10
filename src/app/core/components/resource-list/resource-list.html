@@ -9,15 +9,17 @@
     </p>
   } @else {
     <div class="resource-cards">
-      @for (item of resources(); track item.id || item.name || item.url) {
-        <div class="resource-card" (click)="onItemSelect.emit(item)" swipe (onSwipeLeft)="onItemSelect.emit(item)" (onSwipeRight)="onItemSelect.emit(item)">
-          <h3>{{ item.name || item.model || item.title }}</h3>
-          @if (item.year || item.birthYear || item.releaseDate) {
-            <span class="meta">
-              {{ item.year || item.birthYear || item.releaseDate }}
-            </span>
-          }
-        </div>
+      @for (item of resources(); track item.uid) {
+        <button
+          type="button"
+          class="resource-card"
+          (click)="itemSelect.emit(item)"
+          appSwipe
+          (swipeLeft)="itemSelect.emit(item)"
+          (swipeRight)="itemSelect.emit(item)"
+        >
+          <h3>{{ item.name }}</h3>
+        </button>
       }
     </div>
   }

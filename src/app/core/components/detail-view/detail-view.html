@@ -1,26 +1,38 @@
 <div class="detail-page">
-  @if (!isLoading()) {
-    <header class="detail-header">
-      <h1>{{ resourceTitle() }}</h1>
-    </header>
-  }
-
   @if (isLoading()) {
     <div class="loading-state">Loading details...</div>
-  } @else if (error(); as err) {
-    <div class="error-state">{{ err }}</div>
+  } @else if (error(); as message) {
+    <div class="error-state" role="alert">
+      <p>{{ message }}</p>
+      <button type="button" class="retry-button" (click)="retry()">Retry</button>
+    </div>
   } @else {
+    <header class="detail-header">
+      <h1 id="detail-title">{{ resourceTitle() }}</h1>
+    </header>
+
     <div class="detail-image-wrapper">
       @if (imageLoading()) {
         <div class="image-loading"></div>
+      } @else if (imageFailed()) {
+        <div class="image-placeholder" [style.background-color]="categoryColor()">
+          <span class="placeholder-letter">{{ resourceTitle()[0] }}</span>
+        </div>
       } @else if (imageUrl(); as url) {
-        <img [src]="url" [alt]="resourceTitle()" />
+        <img
+          [src]="url"
+          [alt]="resourceTitle()"
+          loading="lazy"
+          decoding="async"
+          (error)="onImageError()"
+        />
       } @else {
         <div class="image-placeholder" [style.background-color]="categoryColor()">
           <span class="placeholder-letter">{{ resourceTitle()[0] }}</span>
         </div>
       }
     </div>
+
     <div class="detail-grid">
       @for (entry of detailEntries(); track entry.key) {
         <div class="detail-row">

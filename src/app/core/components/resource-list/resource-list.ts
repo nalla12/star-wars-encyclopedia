@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
-import { ResourceData } from '../../types';
+import type { ResourceData } from '../../types';
 import { SwipeDirective } from '../../directives/swipe.directive';
 
 @Component({
@@ -15,5 +15,5 @@ export class ResourceListComponent {
   readonly isLoading = input(false);
   readonly isEmpty = input(false);
   readonly shrunk = input(false);
-  readonly onItemSelect = output<ResourceData>();
+  readonly itemSelect = output<ResourceData>();
 }

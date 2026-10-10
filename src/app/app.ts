@@ -5,14 +5,9 @@ import { BottomNavComponent } from './core/components/bottom-nav/bottom-nav';
 
 @Component({
   selector: 'app-root',
-  imports: [
-    RouterOutlet,
-    MobileHeaderComponent,
-    BottomNavComponent,
-  ],
+  imports: [RouterOutlet, MobileHeaderComponent, BottomNavComponent],
   templateUrl: './app.html',
   styleUrl: './app.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class App {
-}
+export class App {}
